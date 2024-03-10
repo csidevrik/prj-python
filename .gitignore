@@ -129,7 +129,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-merge/env
+*/env
 
 
 # Spyder project settings
