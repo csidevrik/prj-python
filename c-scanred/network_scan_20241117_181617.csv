@@ -1,0 +1,12 @@
+IP,Sistema Operativo,Hostname,MAC,IP Version,Puertos
+192.169.100.41,Windows,N/A,6c:4b:90:3f:7d:5e,IPv4,22/ssh; 80/http; 445/microsoft-ds; 3389/ms-wbt-server
+192.169.100.14,Linux/Unix,N/A,6c:3b:6b:0e:53:43,IPv4,21/ftp; 22/ssh; 23/telnet; 53/domain; 80/http
+192.169.100.11,Linux/Unix,N/A,50:c7:bf:ce:b0:32,IPv4,22/ssh; 80/http; 443/https
+192.169.100.13,Linux/Unix,N/A,d4:ca:6d:e0:08:9d,IPv4,21/ftp; 22/ssh; 23/telnet; 53/domain; 80/http
+192.169.100.30,Linux/Unix,N/A,00:23:24:46:79:07,IPv4,22/ssh; 53/domain; 8080/webcache
+192.169.100.10,Linux/Unix,N/A,50:c7:bf:f4:94:b2,IPv4,22/ssh; 80/http; 443/https
+192.169.100.31,Linux/Unix,N/A,6c:4b:90:81:0a:1e,IPv4,22/ssh; 53/domain; 80/http
+192.169.100.36,Linux/Unix,N/A,30:9c:23:7c:ad:ac,IPv4,3389/ms-wbt-server
+192.169.100.1,Linux/Unix,_gateway,30:de:4b:87:55:fb,IPv4,22/ssh; 53/domain; 80/http; 443/https
+192.169.100.100,Linux/Unix,N/A,44:07:0b:d7:85:1c,IPv4,
+192.169.100.106,Linux/Unix,lte14gen2,N/A,IPv4,22/ssh
