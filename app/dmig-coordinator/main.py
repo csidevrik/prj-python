@@ -34,34 +34,67 @@ class NetworkScanner:
             total_hosts = sum(1 for _ in network.hosts())
             scanned = 0
             
+            # Obtener IP local real
+            local_ip = socket.gethostbyname(socket.gethostname())
+            print(f"\n🔍 IP Local detectada: {local_ip}")
+            print(f"🌐 Escaneando red: {network_str}")
+            print(f"🔌 Puerto: {port}")
+            
             async def check_host(ip: str) -> tuple[str, dict] | None:
                 """Verifica si un host tiene un agente activo"""
                 nonlocal scanned
                 try:
-                    # Si es la IP local, es normal encontrar el agente
-                    is_local = ip == socket.gethostbyname(socket.gethostname())
-                    print(f"Escaneando {ip}{'(IP local)' if is_local else ''}...")
+                    is_local = ip == local_ip
+                    print(f"\nEscaneando {ip}{'(IP local)' if is_local else ''}...")
                     
-                    with xmlrpc.client.ServerProxy(f'http://{ip}:{port}', allow_none=True) as proxy:
-                        proxy._ServerProxy__transport.timeout = 1  # Timeout reducido
-                        info = json.loads(proxy.get_system_info())
-                        print(f"✅ Agente encontrado en {ip}")
-                        return ip, info
+                    # Crear URL con timeout explícito
+                    url = f'http://{ip}:{port}'
+                    print(f"Intentando conectar a {url}")
+                    
+                    with xmlrpc.client.ServerProxy(url, allow_none=True) as proxy:
+                        proxy._ServerProxy__transport.timeout = 3  # Aumentar timeout
+                        try:
+                            print(f"Llamando get_system_info en {ip}...")
+                            info = proxy.get_system_info()
+                            print(f"Respuesta de {ip}: {info}")
+                            info_dict = json.loads(info)
+                            print(f"✅ Agente encontrado en {ip}")
+                            return ip, info_dict
+                        except json.JSONDecodeError as e:
+                            print(f"Error al decodificar respuesta de {ip}: {str(e)}")
+                            return None
+                        except Exception as e:
+                            print(f"Error al llamar get_system_info en {ip}: {type(e).__name__}: {str(e)}")
+                            return None
+                except ConnectionRefusedError:
+                    print(f"Conexión rechazada en {ip}")
+                    return None
+                except socket.timeout:
+                    print(f"Timeout al conectar con {ip}")
+                    return None
                 except Exception as e:
-                    if "already in use" in str(e) and is_local:
-                        print(f"⚠️ Puerto en uso en IP local {ip}")
+                    print(f"Error al conectar con {ip}: {type(e).__name__}: {str(e)}")
                     return None
                 finally:
                     scanned += 1
                     print(f"Progreso: {scanned}/{total_hosts} hosts")
 
-            # Crear grupos de tareas para no saturar la red
-            batch_size = 10  # Escanear 10 hosts a la vez
-            hosts = list(network.hosts())
+            # Escanear primero la IP que sabemos que tiene el agente
+            agent_ip = "192.169.100.38"
+            if ipaddress.IPv4Address(agent_ip) in network:
+                print(f"\n🔍 Verificando IP conocida {agent_ip} primero...")
+                result = await check_host(agent_ip)
+                if result:
+                    ip, info = result
+                    nodes[ip] = info
+            
+            # Escanear el resto de la red
+            batch_size = 10
+            hosts = [str(ip) for ip in network.hosts() if str(ip) != agent_ip]
             
             for i in range(0, len(hosts), batch_size):
                 batch = hosts[i:i + batch_size]
-                tasks = [check_host(str(ip)) for ip in batch]
+                tasks = [check_host(ip) for ip in batch]
                 results = await asyncio.gather(*tasks)
                 
                 for result in results:
@@ -72,7 +105,7 @@ class NetworkScanner:
             return nodes
             
         except Exception as e:
-            print(f"Error al escanear la red: {str(e)}")
+            print(f"❌ Error al escanear la red: {type(e).__name__}: {str(e)}")
             raise
 
 class ConfigScreen(Screen):
