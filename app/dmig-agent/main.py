@@ -14,10 +14,22 @@ class DmigAgent:
         self.register_functions()
 
     def register_functions(self):
-        self.server.register_function(self.get_system_info, 'get_system_info')
-        self.server.register_function(self.change_ip_address, 'change_ip_address')
-        self.server.register_function(self.change_hostname, 'change_hostname')
-        self.server.register_function(self.start_service, 'start_service')
+        """Registra las funciones RPC disponibles"""
+        try:
+            # Registrar cada método individualmente
+            self.server.register_function(self.get_system_info, 'get_system_info')
+            print("✅ Método 'get_system_info' registrado")
+            
+            self.server.register_function(self.change_ip_address, 'change_ip_address')
+            print("✅ Método 'change_ip_address' registrado")
+            
+            self.server.register_function(self.change_hostname, 'change_hostname')
+            print("✅ Método 'change_hostname' registrado")
+            
+            self.server.register_function(self.start_service, 'start_service')
+            print("✅ Método 'start_service' registrado")
+        except Exception as e:
+            print(f"❌ Error al registrar métodos RPC: {str(e)}")
 
     def get_system_info(self):
         """Obtiene información del sistema"""
@@ -98,6 +110,12 @@ class DmigAgent:
 - Puerto: {self.port}
 - IP local: {socket.gethostbyname(socket.gethostname())}
 - Hostname: {socket.gethostname()}
+
+Métodos RPC disponibles:
+- get_system_info
+- change_ip_address
+- change_hostname
+- start_service
 
 El agente está esperando conexiones...
 Presione Ctrl+C para detener el agente.
