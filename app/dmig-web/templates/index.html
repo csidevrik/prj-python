@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMIG - Descarga de Agente</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .download-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>DMIG - Sistema de Migración de Red</h1>
+    
+    <div class="warning">
+        <h3>⚠️ Importante</h3>
+        <p>Este agente debe ser ejecutado con privilegios de administrador para poder realizar cambios en la configuración de red.</p>
+    </div>
+
+    <h2>Descarga del Agente</h2>
+    <p>Seleccione la versión correspondiente a su sistema:</p>
+    
+    <div>
+        <a href="/download/windows?arch=x64" class="download-button">Descargar para Windows x64</a>
+    </div>
+    <div>
+        <a href="/download/windows?arch=x86" class="download-button">Descargar para Windows x86</a>
+    </div>
+
+    <h2>Instrucciones de Instalación</h2>
+    <ol>
+        <li>Descargue el agente correspondiente a su sistema operativo</li>
+        <li>Ejecute el archivo con privilegios de administrador</li>
+        <li>El agente se instalará automáticamente y comenzará a ejecutarse como servicio</li>
+        <li>Una vez instalado, el coordinador podrá detectar y gestionar el equipo</li>
+    </ol>
+</body>
+</html> 
