@@ -27,29 +27,53 @@ class NodeInfo(Static):
 class NetworkScanner:
     @staticmethod
     async def scan_network(network_str: str, port: int = 8000) -> Dict[str, dict]:
+        """Escanea la red en busca de agentes"""
         try:
             nodes = {}
             network = ipaddress.IPv4Network(network_str)
+            total_hosts = sum(1 for _ in network.hosts())
+            scanned = 0
             
-            async def check_host(ip):
+            async def check_host(ip: str) -> tuple[str, dict] | None:
+                """Verifica si un host tiene un agente activo"""
+                nonlocal scanned
                 try:
-                    with xmlrpc.client.ServerProxy(f'http://{ip}:{port}') as proxy:
+                    # Si es la IP local, es normal encontrar el agente
+                    is_local = ip == socket.gethostbyname(socket.gethostname())
+                    print(f"Escaneando {ip}{'(IP local)' if is_local else ''}...")
+                    
+                    with xmlrpc.client.ServerProxy(f'http://{ip}:{port}', allow_none=True) as proxy:
+                        proxy._ServerProxy__transport.timeout = 1  # Timeout reducido
                         info = json.loads(proxy.get_system_info())
+                        print(f"✅ Agente encontrado en {ip}")
                         return ip, info
-                except:
+                except Exception as e:
+                    if "already in use" in str(e) and is_local:
+                        print(f"⚠️ Puerto en uso en IP local {ip}")
                     return None
+                finally:
+                    scanned += 1
+                    print(f"Progreso: {scanned}/{total_hosts} hosts")
 
-            tasks = [check_host(str(ip)) for ip in network.hosts()]
-            results = await asyncio.gather(*tasks)
+            # Crear grupos de tareas para no saturar la red
+            batch_size = 10  # Escanear 10 hosts a la vez
+            hosts = list(network.hosts())
             
-            for result in results:
-                if result:
-                    ip, info = result
-                    nodes[ip] = info
-            
+            for i in range(0, len(hosts), batch_size):
+                batch = hosts[i:i + batch_size]
+                tasks = [check_host(str(ip)) for ip in batch]
+                results = await asyncio.gather(*tasks)
+                
+                for result in results:
+                    if result:
+                        ip, info = result
+                        nodes[ip] = info
+
             return nodes
-        except ValueError as e:
-            raise ValueError(f"Red inválida: {str(e)}")
+            
+        except Exception as e:
+            print(f"Error al escanear la red: {str(e)}")
+            raise
 
 class ConfigScreen(Screen):
     """Pantalla de configuración"""
@@ -102,21 +126,23 @@ class NetworkMigrationScreen(Screen):
         Binding("c", "change_ip", "Cambiar IP"),
         Binding("h", "change_hostname", "Cambiar Hostname"),
         Binding("s", "start_service", "Iniciar Servicio"),
-        Binding("q", "quit", "Salir"),
+        Binding("q", "quit", "Salir", key_display="Q"),
     ]
 
     def compose(self) -> ComposeResult:
+        """Compone la interfaz de la pantalla"""
         yield Header()
         yield Container(
             Vertical(
                 Label(f"Red actual: {self.app.network}", id="network_label"),
-                Label("Escaneando red en busca de agentes...", id="status_label"),
+                Label("Esperando escaneo de red...", id="status_label"),
                 DataTable(id="nodes_table"),
                 Horizontal(
                     Button("Actualizar", id="refresh_btn", variant="primary"),
                     Button("Cambiar IP", id="change_ip_btn"),
                     Button("Cambiar Hostname", id="change_hostname_btn"),
                     Button("Iniciar Servicio", id="start_service_btn"),
+                    Button("Salir", id="quit_btn", variant="error"),
                     classes="controls"
                 ),
                 id="main_container"
@@ -124,39 +150,63 @@ class NetworkMigrationScreen(Screen):
         )
         yield Footer()
 
+    def update_network_label(self) -> None:
+        """Actualiza la etiqueta de red actual"""
+        network_label = self.query_one("#network_label")
+        network_label.update(f"Red actual: {self.app.network} (Puerto: {self.app.port})")
+
     def on_mount(self) -> None:
+        """Configuración inicial de la tabla"""
         table = self.query_one(DataTable)
-        table.add_columns("IP", "Hostname", "OS", "Arquitectura", "Estado")
-        self.refresh_nodes()
+        table.add_columns(
+            "IP", 
+            "Hostname", 
+            "Sistema Operativo",
+            "Arquitectura", 
+            "MAC",
+            "Estado"
+        )
+        self.update_network_label()
 
     async def refresh_nodes(self) -> None:
+        """Actualiza la lista de nodos en la red"""
         status_label = self.query_one("#status_label")
         table = self.query_one(DataTable)
         table.clear()
         
         try:
-            status_label.update("Escaneando red en busca de agentes...")
+            status_label.update(f"⚡ Iniciando escaneo de red {self.app.network}...")
+            self.refresh_btn = self.query_one("#refresh_btn")
+            self.refresh_btn.disabled = True
+            
             nodes = await NetworkScanner.scan_network(self.app.network, self.app.port)
             
             if not nodes:
-                status_label.update("No se encontraron agentes en la red")
+                status_label.update("❌ No se encontraron agentes en la red")
                 return
-                
-            status_label.update(f"Se encontraron {len(nodes)} agentes")
             
-            for ip, info in nodes.items():
+            total_nodes = len(nodes)
+            status_label.update(f"✅ Se encontraron {total_nodes} agente{'s' if total_nodes > 1 else ''}")
+            
+            # Ordenar nodos por IP
+            sorted_nodes = dict(sorted(nodes.items(), key=lambda x: tuple(map(int, x[0].split('.')))))
+            
+            for ip, info in sorted_nodes.items():
                 table.add_row(
                     ip,
                     info['hostname'],
                     info['os'],
                     info['architecture'],
+                    info['mac'],
                     "✅ Conectado"
                 )
+                    
         except Exception as e:
-            self.notify(f"Error al escanear la red: {str(e)}", severity="error")
-
-    async def action_refresh(self) -> None:
-        await self.refresh_nodes()
+            status_label.update("❌ Error al escanear la red")
+            self.notify(f"Error: {str(e)}", severity="error")
+        finally:
+            if hasattr(self, 'refresh_btn'):
+                self.refresh_btn.disabled = False
 
     def action_start_service(self) -> None:
         """Inicia el servicio en los agentes seleccionados"""
@@ -176,6 +226,19 @@ class NetworkMigrationScreen(Screen):
                     self.notify(f"Error: {result.get('message')}", severity="error")
         except Exception as e:
             self.notify(f"Error al iniciar servicio: {str(e)}", severity="error")
+
+    async def action_refresh(self) -> None:
+        """Acción para el atajo de teclado R"""
+        await self.refresh_nodes()
+
+    async def action_quit(self) -> None:
+        """Acción para salir de la aplicación"""
+        try:
+            self.notify("¡Hasta luego!", severity="information")
+            await asyncio.sleep(0.5)
+            self.app.exit()
+        except Exception as e:
+            self.notify(f"Error al salir: {str(e)}", severity="error")
 
 class NodeDetailScreen(Screen):
     """Pantalla para mostrar detalles de un nodo"""
@@ -215,13 +278,19 @@ class DmigCoordinator(App):
     #nodes_table {
         width: 100%;
         height: 1fr;
+        margin: 1;
     }
-    .status_label {
+    #network_label, #status_label {
         text-align: center;
         padding: 1;
+        background: $panel;
     }
     Button {
         margin: 1 2;
+    }
+    #quit_btn {
+        background: red;
+        margin-left: 4;
     }
     """
 
