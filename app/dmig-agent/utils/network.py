@@ -34,7 +34,7 @@ def get_all_ips():
         if len(ips) > 1:
             while True:
                 try:
-                    choice = input("\nSeleccione el número de la IP a usar (Enter para usar la primera): ").strip()
+                    choice = input("\nSeleccione el número de la IP a usar (Enter para usarla): ").strip()
                     if not choice:
                         return ips[0]
                     choice = int(choice)
