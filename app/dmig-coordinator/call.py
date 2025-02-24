@@ -3,6 +3,10 @@ from textual.containers import Container, Horizontal, Vertical, ScrollableContai
 from textual.widgets import Header, Footer, Label, Button, Input, Static
 import xmlrpc.client
 import json
+import asyncio
+from functools import partial
+from concurrent.futures import ThreadPoolExecutor
+from textual.worker import get_current_worker
 
 from widgets.connection_tester import ConnectionTester
 from styles.test_screen import TEST_SCREEN_CSS
@@ -11,6 +15,10 @@ class TestScreen(App):
     """Pantalla principal para probar conexión con agente"""
     
     CSS = TEST_SCREEN_CSS
+
+    def __init__(self):
+        super().__init__()
+        self.executor = ThreadPoolExecutor(max_workers=3)
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -55,129 +63,145 @@ class TestScreen(App):
         yield Footer()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Maneja los eventos de botones"""
         if event.button.id == "test_btn":
-            self.test_connection()
+            # Usar el worker de Textual para ejecutar la tarea asíncrona
+            self.run_worker(self.test_connection())
         elif event.button.id == "change_ip_btn":
-            self.change_ip()
+            self.run_worker(self.change_ip())
         elif event.button.id == "change_hostname_btn":
-            self.change_hostname()
+            # También convertir change_hostname a async
+            self.run_worker(self.change_hostname())
 
-    def test_connection(self) -> None:
-        """Realiza la prueba de conexión con el agente"""
-        ip = self.query_one("#ip_input").value
-        port = self.query_one("#port_input").value
+    async def make_rpc_call(self, ip: str, port: int, method: str, *args) -> dict:
+        """Hace una llamada RPC con timeout y manejo de errores"""
+        url = f'http://{ip}:{port}'
+        loop = asyncio.get_event_loop()
+        
+        try:
+            # Crear proxy con timeout
+            proxy = xmlrpc.client.ServerProxy(url, allow_none=True)
+            proxy._ServerProxy__transport.timeout = 5  # timeout de 5 segundos
+            
+            # Ejecutar llamada RPC en thread separado
+            rpc_method = getattr(proxy, method)
+            result = await loop.run_in_executor(self.executor, rpc_method, *args)
+            return json.loads(result)
+        except Exception as e:
+            # Escapar caracteres especiales del mensaje de error
+            error_msg = str(e).replace('[', '\\[').replace(']', '\\]')
+            return {
+                'success': False,
+                'message': f'Error de conexión: {error_msg}'
+            }
+
+    async def test_connection(self) -> None:
+        """Prueba la conexión básica con el agente"""
         results = self.query_one("#results")
         
         try:
-            port = int(port)
+            ip = self.query_one("#ip_input").value
+            port = int(self.query_one("#port_input").value)
             url = f'http://{ip}:{port}'
             output = [f"\n🔌 Intentando conectar a {url}..."]
             
-            with xmlrpc.client.ServerProxy(url, allow_none=True) as proxy:
-                # Probar get_system_info
-                try:
-                    output.append("\n1. Probando get_system_info()...")
-                    info = proxy.get_system_info()
-                    info_dict = json.loads(info)
-                    output.append("✅ Respuesta recibida:")
-                    for key, value in info_dict.items():
-                        output.append(f"   {key}: {value}")
-                except Exception as e:
-                    output.append(f"❌ Error en get_system_info: {str(e)}")
-
-                # Probar change_ip_address
-                try:
-                    output.append("\n2. Probando change_ip_address()...")
-                    result = proxy.change_ip_address("192.168.1.100", "255.255.255.0", "192.168.1.1")
-                    result_dict = json.loads(result)
-                    output.append("✅ Respuesta recibida:")
-                    output.append(f"   success: {result_dict.get('success')}")
-                    output.append(f"   message: {result_dict.get('message')}")
-                except Exception as e:
-                    output.append(f"❌ Error en change_ip_address: {str(e)}")
-
-                # Probar change_hostname
-                try:
-                    output.append("\n3. Probando change_hostname()...")
-                    result = proxy.change_hostname("NEW-HOST-NAME")
-                    result_dict = json.loads(result)
-                    output.append("✅ Respuesta recibida:")
-                    output.append(f"   success: {result_dict.get('success')}")
-                    output.append(f"   message: {result_dict.get('message')}")
-                except Exception as e:
-                    output.append(f"❌ Error en change_hostname: {str(e)}")
-
-                # Probar start_service
-                try:
-                    output.append("\n4. Probando start_service()...")
-                    result = proxy.start_service()
-                    result_dict = json.loads(result)
-                    output.append("✅ Respuesta recibida:")
-                    output.append(f"   success: {result_dict.get('success')}")
-                    output.append(f"   message: {result_dict.get('message')}")
-                except Exception as e:
-                    output.append(f"❌ Error en start_service: {str(e)}")
-
+            # Hacer llamada RPC con timeout
+            result = await self.make_rpc_call(ip, port, 'get_system_info')
+            
+            if result.get('success') is False:
+                # Asegurarse que el mensaje de error esté escapado
+                message = result.get('message', '').replace('[', '\\[').replace(']', '\\]')
+                output.append(f"❌ {message}")
+            else:
+                output.append("✅ Respuesta recibida:")
+                for key, value in result.items():
+                    output.append(f"   {key}: {value}")
+                output.append("\n✅ Conexión establecida correctamente")
+        
         except ValueError:
-            output = ["❌ Error: El puerto debe ser un número"]
+            output = ["❌ Error: Puerto inválido"]
         except Exception as e:
+            # Escapar caracteres especiales en el mensaje de error
+            error_msg = str(e).replace('[', '\\[').replace(']', '\\]')
             output = [
-                f"\n❌ Error de conexión: {str(e)}",
+                f"\n❌ Error: {error_msg}",
                 "   Verifica que:",
                 "   1. El agente esté corriendo en la IP y puerto especificados",
                 "   2. No haya firewalls bloqueando la conexión",
                 "   3. La red entre las máquinas esté funcionando (prueba con ping)"
             ]
         
+        # Unir y actualizar el resultado
         results.update("\n".join(output))
 
-    def change_ip(self) -> None:
+    async def change_ip(self) -> None:
         """Cambia la IP del agente"""
-        ip = self.query_one("#ip_input").value
-        port = self.query_one("#port_input").value
-        new_ip = self.query_one("#new_ip_input").value
-        subnet_mask = self.query_one("#subnet_mask_input").value
-        gateway = self.query_one("#gateway_input").value
         results = self.query_one("#results")
         
         try:
-            port = int(port)
-            url = f'http://{ip}:{port}'
-            output = [f"\n🔌 Intentando cambiar IP en {url}..."]
+            ip = self.query_one("#ip_input").value
+            port = int(self.query_one("#port_input").value)
+            new_ip = self.query_one("#new_ip_input").value
+            subnet_mask = self.query_one("#subnet_mask_input").value
+            gateway = self.query_one("#gateway_input").value
+
+            output = [f"\n🔌 Intentando cambiar IP {ip} → {new_ip}..."]
             
-            with xmlrpc.client.ServerProxy(url, allow_none=True) as proxy:
-                result = proxy.change_ip_address(new_ip, subnet_mask, gateway)
-                result_dict = json.loads(result)
-                output.append("✅ Respuesta recibida:")
-                output.append(f"   success: {result_dict.get('success')}")
-                output.append(f"   message: {result_dict.get('message')}")
+            # Hacer llamada RPC con timeout
+            result = await self.make_rpc_call(
+                ip, port, 'change_ip_address',
+                new_ip, subnet_mask, gateway
+            )
+            
+            if result.get('success'):
+                output.extend([
+                    "✅ IP cambiada correctamente",
+                    f"   Mensaje: {result.get('message')}",
+                    "\n⚠️ La conexión se perderá mientras el agente cambia su IP"
+                ])
+            else:
+                output.extend([
+                    "❌ Error al cambiar IP",
+                    f"   Mensaje: {result.get('message')}"
+                ])
                 
+        except ValueError:
+            output = ["❌ Error: Datos inválidos"]
         except Exception as e:
-            output = [f"\n❌ Error al cambiar IP: {str(e)}"]
+            output = [f"\n❌ Error inesperado: {str(e)}"]
         
         results.update("\n".join(output))
 
-    def change_hostname(self) -> None:
+    async def change_hostname(self) -> None:
         """Cambia el hostname del agente"""
-        ip = self.query_one("#ip_input").value
-        port = self.query_one("#port_input").value
-        new_hostname = self.query_one("#hostname_input").value
         results = self.query_one("#results")
         
         try:
-            port = int(port)
-            url = f'http://{ip}:{port}'
-            output = [f"\n🔌 Intentando cambiar hostname en {url}..."]
+            ip = self.query_one("#ip_input").value
+            port = int(self.query_one("#port_input").value)
+            new_hostname = self.query_one("#hostname_input").value
             
-            with xmlrpc.client.ServerProxy(url, allow_none=True) as proxy:
-                result = proxy.change_hostname(new_hostname)
-                result_dict = json.loads(result)
-                output.append("✅ Respuesta recibida:")
-                output.append(f"   success: {result_dict.get('success')}")
-                output.append(f"   message: {result_dict.get('message')}")
+            output = [f"\n🔌 Intentando cambiar hostname..."]
+            
+            result = await self.make_rpc_call(
+                ip, port, 'change_hostname', new_hostname
+            )
+            
+            if result.get('success'):
+                output.extend([
+                    "✅ Hostname cambiado correctamente",
+                    f"   Mensaje: {result.get('message')}"
+                ])
+            else:
+                output.extend([
+                    "❌ Error al cambiar hostname",
+                    f"   Mensaje: {result.get('message')}"
+                ])
                 
+        except ValueError:
+            output = ["❌ Error: Puerto inválido"]
         except Exception as e:
-            output = [f"\n❌ Error al cambiar hostname: {str(e)}"]
+            output = [f"\n❌ Error inesperado: {str(e)}"]
         
         results.update("\n".join(output))
 
