@@ -1,16 +1,18 @@
-import PyInstaller.__main__
 import os
+import PyInstaller.__main__
 
 def build_exe():
     """Construye el ejecutable del agente"""
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    
+    utils_path = os.path.join(script_dir, "utils")  # Ruta absoluta de utils
+    path_sep = ";" if os.name == "nt" else ":"  # ';' en Windows, ':' en Linux
+
     PyInstaller.__main__.run([
         'main.py',
         '--onefile',
         '--name=dmig-agent',
-        '--add-data=utils;utils',  # Incluir el directorio utils
-        '--hidden-import=utils.network',  # Importaciones ocultas
+        f'--add-data={utils_path}{path_sep}utils',  # Usa ruta absoluta
+        '--hidden-import=utils.network',
         '--hidden-import=utils.system',
         '--hidden-import=utils.validation',
         '--distpath=dist',
@@ -18,15 +20,6 @@ def build_exe():
         '--specpath=build',
         '--clean'
     ])
-    
-    # Construir versión x86
-    if sys.maxsize > 2**32:  # Solo si estamos en un sistema x64
-        PyInstaller.__main__.run([
-            *common_options,
-            '--distpath', dist_dir,
-            '--name', 'dmig_agent_x86',
-            '--target-arch', 'x86'
-        ])
 
 if __name__ == '__main__':
-    build_exe() 
+    build_exe()
