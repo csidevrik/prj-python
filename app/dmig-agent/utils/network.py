@@ -1,4 +1,5 @@
 import socket
+import psutil  
 
 def get_all_ips():
     """Obtiene todas las IPs de las interfaces de red"""
@@ -51,3 +52,26 @@ def get_all_ips():
     except Exception as e:
         print(f"Error al obtener IPs: {e}")
         return '0.0.0.0' 
+
+def get_interface_by_ip(ip_address):
+    """Obtiene el nombre de la interfaz de red asociada a una dirección IP."""
+    for interface, addrs in psutil.net_if_addrs().items():
+        for addr in addrs:
+            if addr.family == socket.AF_INET and addr.address == ip_address:
+                return interface
+    return None
+
+def get_mac_by_interface(interface_name):
+    """Obtiene la dirección MAC de una interfaz de red específica."""
+    if interface_name in psutil.net_if_addrs():
+        for addr in psutil.net_if_addrs()[interface_name]:
+            if addr.family == psutil.AF_LINK:  # Identifica direcciones MAC
+                return addr.address
+    return None
+
+def get_mac_by_ip(ip_address):
+    """Dada una IP, obtiene la MAC de la interfaz asociada."""
+    interface = get_interface_by_ip(ip_address)
+    if not interface:
+        return None
+    return get_mac_by_interface(interface)
