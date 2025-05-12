@@ -29,7 +29,7 @@ async def download_agent(os_type: str, arch: str = "x64"):
     
     if os_type.lower() == "windows":
         if arch.lower() == "x64":
-            agent_path = os.path.join(downloads_path, "dmig_agent_x64.exe")
+            agent_path = os.path.join(downloads_path, "windows", f"dmig_agent_{arch}.exe")
         else:
             agent_path = os.path.join(downloads_path, "dmig_agent_x86.exe")
     else:
