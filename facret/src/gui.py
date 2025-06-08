@@ -304,8 +304,8 @@ def run_gui():
         # --- Buscador de archivos dentro del directorio seleccionado ---
         file_search_query = ""
         file_search_field = ft.TextField(
-            visible=False,
-            width=0,
+            visible=True,  # Ahora siempre visible en la primera fila
+            width=250,
             height=32,
             hint_text="Buscar archivo...",
             border_radius=8,
@@ -449,10 +449,18 @@ def run_gui():
                     files_list.append(f)
                 files_column.controls.clear()
                 for f in files_list:
+                    # Resalta borde si hay match
+                    is_match = file_search_query and file_search_query.lower() in f.lower()
                     files_column.controls.append(
-                        ft.ListTile(
-                            title=ft.Row(highlight_text(f, file_search_query), spacing=0),
-                            on_click=lambda e, fname=f: show_preview(fname),
+                        ft.Container(
+                            ft.ListTile(
+                                title=ft.Row(highlight_text(f, file_search_query), spacing=0),
+                                on_click=lambda e, fname=f: show_preview(fname),
+                            ),
+                            border=ft.border.all(2, "#06bd98") if is_match else None,
+                            border_radius=6,
+                            padding=2,
+                            margin=2,
                         )
                     )
                 files_column.update()
@@ -463,6 +471,49 @@ def run_gui():
 
         preview_label = ft.Text("Selecciona un archivo para ver el preview.", size=12, selectable=True, expand=True)
         pdf_viewer = ft.Container(visible=False, expand=True)
+
+        # Para integrar la previsualización de PDFs como imagen sin dañar tu código actual:
+        # 1. Instala pdf2image: pip install pdf2image
+        # 2. Descarga Poppler y agrega su carpeta bin al PATH (en Windows).
+        # 3. Agrega la función show_pdf_as_image y modifíca show_preview para usarla.
+
+        import tempfile
+        try:
+            from pdf2image import convert_from_path
+        except ImportError:
+            convert_from_path = None
+
+        # Ajusta aquí la ruta a la carpeta bin de Poppler descargada
+        POPPLER_BIN_PATH = os.path.join(os.path.dirname(__file__), "poppler-24.08.0", "Library", "bin")
+
+        def show_pdf_as_image(pdf_path):
+            if convert_from_path is None:
+                pdf_viewer.content = ft.Text("pdf2image no está instalado.", color="red")
+                pdf_viewer.visible = True
+                pdf_viewer.update()
+                return
+            try:
+                # Elimina la imagen previa para evitar caché
+                img_path = os.path.join(tempfile.gettempdir(), f"preview_{os.path.basename(pdf_path)}.png")
+                images = convert_from_path(
+                    pdf_path,
+                    first_page=1,
+                    last_page=1,
+                    poppler_path=POPPLER_BIN_PATH
+                )
+                if images:
+                    images[0].save(img_path, "PNG")
+                    pdf_viewer.content = ft.Image(src=img_path, expand=True, fit=ft.ImageFit.CONTAIN)
+                    pdf_viewer.visible = True
+                    pdf_viewer.update()
+                else:
+                    pdf_viewer.content = ft.Text("No se pudo renderizar el PDF.", color="red")
+                    pdf_viewer.visible = True
+                    pdf_viewer.update()
+            except Exception as ex:
+                pdf_viewer.content = ft.Text(f"Error al mostrar PDF: {ex}", color="red")
+                pdf_viewer.visible = True
+                pdf_viewer.update()
 
         def show_preview(fname):
             nonlocal selected_file
@@ -481,13 +532,8 @@ def run_gui():
                 pdf_viewer.visible = False
             elif fname.lower().endswith(".pdf"):
                 preview_label.visible = False
-                # Mostrar PDF usando Flet PDFViewer si está disponible
-                try:
-                    pdf_viewer.content = ft.PdfViewer(src=full_path)
-                    pdf_viewer.visible = True
-                except Exception as ex:
-                    pdf_viewer.content = ft.Text(f"No se puede mostrar PDF: {ex}", color="red")
-                    pdf_viewer.visible = True
+                pdf_viewer.visible = True
+                show_pdf_as_image(full_path)
             else:
                 try:
                     with open(full_path, "r", encoding="utf-8", errors="ignore") as f:
@@ -504,52 +550,59 @@ def run_gui():
 
         files_column = ft.Column(expand=True, scroll="auto")
 
-        # --- Fila superior: botón, label y buscador de archivos ---
+        # --- Nueva fila 1: campo de búsqueda ---
+        search_row = ft.Container(
+            content=ft.Stack(
+                [
+                    file_search_field,
+                    ft.Container(
+                        file_suggestions_dropdown,
+                        top=36,
+                        left=0,
+                        width=250,
+                        bgcolor="#fff",
+                        border_radius=8,
+                        border=ft.border.all(1, "#ccc"),
+                        shadow=ft.BoxShadow(blur_radius=4, color="#88888822"),
+                        visible=file_suggestions_dropdown.visible,
+                    ),
+                ],
+                width=250,
+                height=40,
+            ),
+            padding=ft.padding.only(left=16, top=8, bottom=8),
+        )
+
+        # --- Nueva fila 2: botón, label y contenido de archivos ---
         dir_row = ft.Row(
             controls=[
                 open_dir_button,
                 dir_label,
-                ft.Stack(
-                    [
-                        file_search_field,
-                        ft.Container(
-                            file_suggestions_dropdown,
-                            top=36,
-                            left=0,
-                            width=200,
-                            bgcolor="#fff",
-                            border_radius=8,
-                            border=ft.border.all(1, "#ccc"),
-                            shadow=ft.BoxShadow(blur_radius=4, color="#88888822"),
-                            visible=file_suggestions_dropdown.visible,
-                        ),
-                    ],
-                    width=200,
-                    height=40,
-                ),
-                ft.IconButton(
-                    ft.Icons.SEARCH,
-                    icon_color="black",
-                    tooltip="Buscar archivo",
-                    style=ft.ButtonStyle(padding=0, shape=None),
-                    on_click=expand_file_search,
-                ),
             ],
             alignment="start",
             vertical_alignment="center",
             spacing=10,
         )
 
+        files_list_container = ft.Container(
+            files_column,
+            width=300,
+            bgcolor="#f6f6f6",
+            expand=False,
+            padding=5,
+        )
+
         # --- Fila inferior: archivos y preview ---
         files_and_preview_row = ft.Row(
             controls=[
-                ft.Container(files_column, width=300, bgcolor="#f6f6f6", expand=False, padding=5),
+                files_list_container,
                 ft.VerticalDivider(width=2, color="#cccccc"),
                 ft.Container(
                     ft.Stack([preview_label, pdf_viewer]),
                     expand=True,
                     bgcolor="#f9f9f9",
-                    padding=5,
+                    padding=0,
+                    alignment=ft.alignment.center,
                 ),
             ],
             expand=True,
@@ -560,11 +613,12 @@ def run_gui():
         content_area = ft.Container(
             content=ft.Column(
                 [
-                    dir_row,
-                    files_and_preview_row,
+                    search_row,      # Primera fila: campo de búsqueda
+                    dir_row,         # Segunda fila: botón y label de directorio
+                    files_and_preview_row,  # Tercera fila: archivos y preview
                 ],
                 expand=True,
-                spacing=10,
+                spacing=0,
             ),
             gradient=ft.LinearGradient(
                 begin=ft.alignment.top_left,
@@ -643,8 +697,77 @@ def run_gui():
 # Descarga: https://github.com/oschwartz10612/poppler-windows/releases/
 # En Linux/Mac puedes instalarlo con el gestor de paquetes (ej: `sudo apt install poppler-utils`).
 
-# Ejemplo de uso con pdf2image:
-#   pip install pdf2image
-#   from pdf2image import convert_from_path
-#   images = convert_from_path("archivo.pdf", poppler_path="C:/ruta/a/poppler/bin")
-#   # Luego muestra la imagen en Flet con ft.Image
+# ¿Para qué sirve Poppler?
+# ------------------------
+# Poppler es una librería de código abierto especializada en procesar archivos PDF.
+# Su función principal es permitir la conversión de páginas PDF a imágenes (PNG, JPEG, etc.)
+# y la extracción de contenido de archivos PDF.
+#
+# En Python, Poppler es utilizada por librerías como pdf2image para convertir páginas PDF en imágenes,
+# lo que permite mostrar previsualizaciones de PDFs en aplicaciones gráficas (como Flet, Tkinter, etc.).
+#
+# Ejemplo de uso:
+# - pdf2image usa Poppler para abrir un PDF y convertir la primera página en una imagen PNG.
+# - Luego puedes mostrar esa imagen en tu aplicación.
+#
+# En resumen: Poppler es el motor que hace posible la conversión de PDF a imagen en tu app Python.
+# Debes instalarlo en tu sistema para que pdf2image funcione correctamente.
+
+# ¿Qué hace Poppler en Windows?
+# -----------------------------
+# Poppler en Windows es un conjunto de utilidades y librerías que permiten procesar archivos PDF.
+# Su función principal en tu proyecto es servir como backend para convertir páginas PDF a imágenes (PNG, JPEG, etc.)
+# cuando usas librerías Python como pdf2image.
+#
+# ¿Por qué lo necesitas?
+# - pdf2image (y otras librerías) no pueden convertir PDFs a imágenes por sí solas.
+# - pdf2image llama internamente a las utilidades de Poppler (como pdftoppm.exe) para hacer la conversión.
+# - Por eso, debes descargar Poppler para Windows y agregar la carpeta `bin` de Poppler al PATH de tu sistema.
+#
+# Ejemplo de flujo:
+# 1. Tu código llama a pdf2image.convert_from_path("archivo.pdf").
+# 2. pdf2image ejecuta pdftoppm.exe (de Poppler) para convertir la página del PDF a una imagen.
+# 3. pdf2image recibe la imagen y tú la muestras en tu app Flet.
+#
+# Sin Poppler, pdf2image no puede funcionar en Windows y no podrás previsualizar PDFs como imágenes.
+
+# NOTA IMPORTANTE SOBRE POPPLER Y DISTRIBUCIÓN DE TU APP
+# -------------------------------------------------------
+# Si quieres entregar tu proyecto como un solo .exe para usuarios no técnicos de Windows,
+# lo ideal es incluir los binarios de Poppler dentro de tu instalador o carpeta del proyecto.
+#
+# ¿Cómo hacerlo?
+# 1. Descarga Poppler para Windows y copia la carpeta "bin" (con pdftoppm.exe, etc.) dentro de tu proyecto,
+#    por ejemplo: c:\Users\adminos\dev\github\prj-python\facret\poppler\bin
+# 2. Al llamar a convert_from_path, pasa el argumento poppler_path con la ruta relativa:
+#    images = convert_from_path(pdf_path, first_page=1, last_page=1, poppler_path="poppler/bin")
+# 3. Si usas PyInstaller para crear el .exe, asegúrate de incluir la carpeta poppler/bin en el bundle.
+#
+# Así, tus usuarios no tendrán que instalar ni configurar nada extra.
+#
+# Ejemplo de integración:
+#   images = convert_from_path(pdf_path, first_page=1, last_page=1, poppler_path=os.path.join(os.getcwd(), "poppler", "bin"))
+#
+# Esto hace tu app portable y fácil de usar para cualquier usuario de Windows.
+
+# ¿Dónde ubicar poppler/bin?
+# --------------------------
+# Lo ideal es que la carpeta poppler/bin esté dentro de tu proyecto, por ejemplo:
+# c:\Users\adminos\dev\github\prj-python\facret\src\poppler\bin
+#
+# Así, puedes usar en tu código:
+#   poppler_path = os.path.join(os.path.dirname(__file__), "poppler", "bin")
+#   images = convert_from_path(pdf_path, first_page=1, last_page=1, poppler_path=poppler_path)
+#
+# Esto asegura que funcione tanto en desarrollo como en el .exe generado.
+# Si usas PyInstaller, incluye src/poppler/bin como parte del bundle.
+
+# Comentario final:
+# -----------------
+# Flet con Python permite lograr una experiencia de preview de archivos bastante funcional y multiplataforma,
+# pero si buscas una experiencia visual y de integración nativa idéntica al File Explorer de Windows,
+# tecnologías como Flutter o React Native para Windows pueden ofrecer más flexibilidad gráfica y controles nativos.
+# Sin embargo, requieren más configuración y conocimientos de sus respectivos ecosistemas.
+
+# Puedes seguir mejorando tu prototipo en Flet y luego comparar con Flutter/React Native para decidir
+# cuál se adapta mejor a tus necesidades y a la experiencia de usuario que buscas.
