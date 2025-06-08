@@ -98,7 +98,7 @@ def run_gui():
             [
                 # Icono de hamburguesa a la izquierda
 
-                ft.Text("AppBar", color="black", weight="bold", size=20, tooltip="Title app"),
+                ft.Text("AppBar", color="black", weight="bold", size=14, tooltip="Title app"),
                 ft.Container(expand=True),
                 # Campo de búsqueda y sugerencias
                 ft.Stack(
@@ -235,7 +235,7 @@ def run_gui():
         nav_rail = ft.Container(
             content=ft.Column(
                 [
-                    ft.Text("Tools", color="black", size=22, text_align=ft.TextAlign.CENTER),
+                    ft.Text("Tools", color="black", size=14, text_align=ft.TextAlign.CENTER),
                     ft.Divider(),
                     ft.ListTile(
                         leading=ft.Icon(ft.Icons.OPEN_IN_BROWSER),
@@ -302,6 +302,7 @@ def run_gui():
         selected_file = None
 
         # --- Buscador de archivos dentro del directorio seleccionado ---
+        file_search_query = ""
         file_search_field = ft.TextField(
             visible=False,
             width=0,
@@ -311,9 +312,15 @@ def run_gui():
             content_padding=ft.padding.symmetric(horizontal=8),
             text_size=12,
             autofocus=False,
-            on_change=lambda e: update_file_suggestions(e.control.value),
+            on_change=lambda e: on_file_search_change(e.control.value),
         )
         file_suggestions_dropdown = ft.Column(visible=False, spacing=0)
+
+        def on_file_search_change(query):
+            nonlocal file_search_query
+            file_search_query = query
+            update_file_suggestions(query)
+            update_files_list()  # Resalta en tiempo real
 
         def update_file_suggestions(query):
             if not selected_dir or not files_list:
@@ -349,12 +356,41 @@ def run_gui():
             file_suggestions_dropdown.update()
 
         # --- Botón y label de directorio ---
-        dir_label = ft.Text("", size=14, selectable=True, expand=True)
+        dir_label = ft.Text("", size=8, selectable=True, expand=True)
         open_dir_button = ft.ElevatedButton(
             "Open directory",
             icon=ft.Icons.FOLDER_OPEN,
-            on_click=lambda e: pick_directory(),
+            on_click=lambda e: file_picker.get_directory_path(),
         )
+
+        # FilePicker debe ser añadido a la página
+        file_picker = ft.FilePicker(
+            on_result=lambda e: on_result(e)
+        )
+        page.overlay.append(file_picker)
+
+        def on_result(e: ft.FilePickerResultEvent):
+            nonlocal selected_dir
+            if e.path and os.path.isdir(e.path):
+                selected_dir = e.path
+                dir_label.value = selected_dir
+                dir_label.update()
+                update_files_list()
+                # Mostrar buscador de archivos solo si hay un directorio válido
+                file_search_field.visible = True
+                file_search_field.width = 200
+                file_search_field.update()
+            else:
+                selected_dir = None
+                dir_label.value = ""
+                dir_label.update()
+                files_column.controls.clear()
+                files_column.update()
+                preview_label.value = "Selecciona un archivo para ver el preview."
+                preview_label.update()
+                file_search_field.visible = False
+                file_search_field.width = 0
+                file_search_field.update()
 
         def pick_directory():
             def on_result(e: ft.FilePickerResultEvent):
@@ -364,7 +400,6 @@ def run_gui():
                     dir_label.value = selected_dir
                     dir_label.update()
                     update_files_list()
-                    # Mostrar buscador de archivos solo si hay un directorio válido
                     file_search_field.visible = True
                     file_search_field.width = 200
                     file_search_field.update()
@@ -382,6 +417,24 @@ def run_gui():
             page.dialog = ft.FilePicker(on_result=on_result)
             page.dialog.get_directory_path()
 
+        def highlight_text(text, query):
+            if not query:
+                return [ft.Text(text, size=12)]
+            parts = []
+            idx = 0
+            q = query.lower()
+            t = text.lower()
+            while True:
+                found = t.find(q, idx)
+                if found == -1:
+                    parts.append(ft.Text(text[idx:], size=12))
+                    break
+                if found > idx:
+                    parts.append(ft.Text(text[idx:found], size=12))
+                parts.append(ft.Text(text[found:found+len(q)], size=12, bgcolor="#06bd98"))
+                idx = found + len(q)
+            return parts
+
         def update_files_list():
             nonlocal files_list
             if not selected_dir:
@@ -398,7 +451,7 @@ def run_gui():
                 for f in files_list:
                     files_column.controls.append(
                         ft.ListTile(
-                            title=ft.Text(f, size=12),
+                            title=ft.Row(highlight_text(f, file_search_query), spacing=0),
                             on_click=lambda e, fname=f: show_preview(fname),
                         )
                     )
@@ -409,25 +462,45 @@ def run_gui():
                 files_column.update()
 
         preview_label = ft.Text("Selecciona un archivo para ver el preview.", size=12, selectable=True, expand=True)
+        pdf_viewer = ft.Container(visible=False, expand=True)
 
         def show_preview(fname):
             nonlocal selected_file
             selected_file = fname
             if not selected_dir:
                 preview_label.value = "No hay directorio seleccionado."
+                preview_label.visible = True
+                pdf_viewer.visible = False
                 preview_label.update()
+                pdf_viewer.update()
                 return
             full_path = os.path.join(selected_dir, fname)
             if os.path.isdir(full_path):
                 preview_label.value = f"{fname} es un directorio."
+                preview_label.visible = True
+                pdf_viewer.visible = False
+            elif fname.lower().endswith(".pdf"):
+                preview_label.visible = False
+                # Mostrar PDF usando Flet PDFViewer si está disponible
+                try:
+                    pdf_viewer.content = ft.PdfViewer(src=full_path)
+                    pdf_viewer.visible = True
+                except Exception as ex:
+                    pdf_viewer.content = ft.Text(f"No se puede mostrar PDF: {ex}", color="red")
+                    pdf_viewer.visible = True
             else:
                 try:
                     with open(full_path, "r", encoding="utf-8", errors="ignore") as f:
                         content = f.read(2048)
                         preview_label.value = content if content else "(Archivo vacío)"
+                        preview_label.visible = True
+                        pdf_viewer.visible = False
                 except Exception as ex:
                     preview_label.value = f"No se puede mostrar preview: {ex}"
+                    preview_label.visible = True
+                    pdf_viewer.visible = False
             preview_label.update()
+            pdf_viewer.update()
 
         files_column = ft.Column(expand=True, scroll="auto")
 
@@ -472,7 +545,12 @@ def run_gui():
             controls=[
                 ft.Container(files_column, width=300, bgcolor="#f6f6f6", expand=False, padding=5),
                 ft.VerticalDivider(width=2, color="#cccccc"),
-                ft.Container(preview_label, expand=True, bgcolor="#f9f9f9", padding=5),
+                ft.Container(
+                    ft.Stack([preview_label, pdf_viewer]),
+                    expand=True,
+                    bgcolor="#f9f9f9",
+                    padding=5,
+                ),
             ],
             expand=True,
             spacing=0,
@@ -520,6 +598,53 @@ def run_gui():
         page.add(layout)
         # No update_files_list() aquí, solo se actualiza tras seleccionar un directorio
 
-        pass
+        # --- PDF Preview: Consideraciones ---
+        # 1. Flet actualmente NO incluye PdfViewer en su API pública estable.
+        # 2. Si usas Flet Desktop >=0.18.0 puedes probar con:
+        #    from flet_desktop_pdf import PdfViewer
+        #    Y luego usar PdfViewer(src=full_path)
+        # 3. Alternativas en Python:
+        #    - PyMuPDF (fitz): para extraer páginas y renderizarlas como imágenes.
+        #    - pdf2image: convierte páginas PDF a imágenes (requiere poppler).
+        #    - Muéstralas en Flet usando ft.Image.
+        # Ejemplo básico usando pdf2image (requiere instalar pdf2image y poppler):
+
+        # from pdf2image import convert_from_path
+        # def show_pdf_as_image(pdf_path):
+        #     images = convert_from_path(pdf_path, first_page=1, last_page=1)
+        #     if images:
+        #         img_path = os.path.join(tempfile.gettempdir(), "preview_page1.png")
+        #         images[0].save(img_path, "PNG")
+        #         pdf_viewer.content = ft.Image(src=img_path, expand=True)
+        #         pdf_viewer.visible = True
+        #         pdf_viewer.update()
+
+        # En show_preview, llama a show_pdf_as_image(full_path) para PDFs.
+
+        # Recomendación:
+        # - Para preview PDF multiplataforma, usa pdf2image + ft.Image.
+        # - Para solo texto, puedes extraer texto con PyMuPDF o pdfminer.
+        # - Si Flet agrega PdfViewer oficialmente, úsalo directamente.
 
     ft.app(target=main)
+
+# ¿Qué es Flet Desktop?
+# ---------------------
+# Flet Desktop es una variante de Flet que permite crear aplicaciones de escritorio (Windows, macOS, Linux)
+# usando Python y la misma API de Flet. Permite acceso a recursos locales y controles nativos.
+# Para usar Flet Desktop, simplemente ejecuta tu app con `flet` instalado y NO uses el modo web.
+# Más info: https://flet.dev/docs/desktop
+
+# ¿Qué es Poppler?
+# ----------------
+# Poppler es una librería de código abierto para procesar archivos PDF.
+# Es utilizada por herramientas como pdf2image para convertir páginas PDF a imágenes.
+# En Windows, debes descargar los binarios de Poppler y agregar su carpeta `bin` al PATH del sistema.
+# Descarga: https://github.com/oschwartz10612/poppler-windows/releases/
+# En Linux/Mac puedes instalarlo con el gestor de paquetes (ej: `sudo apt install poppler-utils`).
+
+# Ejemplo de uso con pdf2image:
+#   pip install pdf2image
+#   from pdf2image import convert_from_path
+#   images = convert_from_path("archivo.pdf", poppler_path="C:/ruta/a/poppler/bin")
+#   # Luego muestra la imagen en Flet con ft.Image
