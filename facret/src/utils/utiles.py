@@ -1,31 +1,6 @@
 import os
 import hashlib
 
-# def remove_prefix_files_pdf(folder, prefix):
-#     # Obtener la lista de archivos en la carpeta
-#     files = os.listdir(folder)
-#     files_pdf = [file for file in files if file.lower().endswith(".pdf")]
-
-#     # Iterar a través de los archivos PDF y renombrarlos
-#     for file_pdf in files_pdf:
-#         # Obtener el nombre del archivo sin extensión
-#         nombre_sin_extension = os.path.splitext(file_pdf)[0]
-
-#         # Verificar si el nombre del archivo PDF comienza con el prefijo dado
-#         if nombre_sin_extension.startswith(prefix):
-#             # Eliminar el prefijo del nombre del archivo PDF
-#             nuevo_nombre = nombre_sin_extension[len(prefix):]
-
-#             # Construir el nuevo nombre del archivo PDF
-#             nuevo_nombre_pdf = nuevo_nombre + ".pdf"
-
-#             # Ruta completa del archivo original y nuevo
-#             ruta_archivo_original = os.path.join(folder, file_pdf)
-#             ruta_archivo_nuevo = os.path.join(folder, nuevo_nombre_pdf)
-
-#             # Renombrar el archivo PDF
-#             os.rename(ruta_archivo_original, ruta_archivo_nuevo)
-
 def remove_prefix_files_csv(folder, prefix):
     extension = '.csv'
     remove_prefix_files(folder, prefix, extension)
