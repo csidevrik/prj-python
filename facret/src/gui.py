@@ -2,6 +2,118 @@ import flet as ft
 import os
 # from src.logic.logic import clean_xml_files, process_all_xml_files
 
+# Ejemplo de framework básico para una GUI con subsecciones tipo Outlook/Fluent UI
+
+class AppGradients:
+    @staticmethod
+    def main():
+        return ft.LinearGradient(
+            begin=ft.alignment.top_left,
+            end=ft.alignment.bottom_right,
+            colors=["#578881", "#B7EF50"],
+        )
+
+    @staticmethod
+    def sidebar():
+        return ft.LinearGradient(
+            begin=ft.alignment.top_center,
+            end=ft.alignment.bottom_center,
+            colors=["#B0B0B0", "#E0E0E0"],
+        )
+
+    @staticmethod
+    def header():
+        return ft.LinearGradient(
+            begin=ft.alignment.center_left,
+            end=ft.alignment.center_right,
+            colors=["#46758A", "#B7EF50"],
+        )
+
+# Modelo de menú y subsecciones
+MENU_STRUCTURE = [
+    {
+        "key": "home",
+        "icon": ft.Icons.HOME,
+        "label": "Inicio",
+        "submenus": []
+    },
+    {
+        "key": "facturas",
+        "icon": ft.Icons.RECEIPT,
+        "label": "Facturas",
+        "submenus": [
+            {"key": "facturas_pendientes", "label": "Pendientes"},
+            {"key": "facturas_procesadas", "label": "Procesadas"},
+        ]
+    },
+    {
+        "key": "retenciones",
+        "icon": ft.Icons.RECEIPT_LONG,
+        "label": "Retenciones",
+        "submenus": [
+            {"key": "retenciones_pendientes", "label": "Pendientes"},
+            {"key": "retenciones_procesadas", "label": "Procesadas"},
+        ]
+    },
+    {
+        "key": "settings",
+        "icon": ft.Icons.SETTINGS,
+        "label": "Configuración",
+        "submenus": [
+            {"key": "general", "label": "General"},
+            {"key": "apariencia", "label": "Apariencia"},
+            {"key": "notificaciones", "label": "Notificaciones"},
+        ]
+    }
+]
+
+class ContentAreas:
+    @staticmethod
+    def home():
+        return ft.Text("Bienvenido a FACRET", size=24)
+
+    @staticmethod
+    def facturas(subkey=None):
+        if subkey == "facturas_pendientes":
+            return ft.Text("Facturas Pendientes")
+        elif subkey == "facturas_procesadas":
+            return ft.Text("Facturas Procesadas")
+        return ft.Text("Panel de Facturas")
+
+    @staticmethod
+    def retenciones(subkey=None):
+        if subkey == "retenciones_pendientes":
+            return ft.Text("Retenciones Pendientes")
+        elif subkey == "retenciones_procesadas":
+            return ft.Text("Retenciones Procesadas")
+        return ft.Text("Panel de Retenciones")
+
+    @staticmethod
+    def settings(subkey=None):
+        submenu_map = {
+            "general": ft.Text("Configuración General"),
+            "apariencia": ft.Text("Configuración de Apariencia"),
+            "notificaciones": ft.Text("Configuración de Notificaciones"),
+        }
+        return ft.Column([
+            ft.Text("Configuración", size=20, weight="bold"),
+            ft.TextField(label="Buscar en configuración...", width=300),
+            ft.Row([
+                ft.Column([
+                    ft.Text("General", weight="bold", bgcolor="#f7f7a1" if subkey == "general" else None),
+                    ft.Text("Apariencia", bgcolor="#f7f7a1" if subkey == "apariencia" else None),
+                    ft.Text("Notificaciones", bgcolor="#f7f7a1" if subkey == "notificaciones" else None),
+                ], width=150),
+                ft.VerticalDivider(width=2),
+                ft.Container(
+                    submenu_map.get(subkey, ft.Text("Selecciona una subsección")),
+                    expand=True,
+                    bgcolor="#f9f9f9",
+                    padding=10,
+                )
+            ], expand=True)
+        ], expand=True, spacing=20)
+
 def run_gui():
     def main(page: ft.Page):
         # page.window.title_bar_hidden = True  # Oculta la barra de título del sistema
@@ -235,38 +347,16 @@ def run_gui():
         nav_rail = ft.Container(
             content=ft.Column(
                 [
-                    ft.Text("Tools", color="black", size=14, text_align=ft.TextAlign.CENTER),
+                    ft.Text("Menú", color="black", size=14, text_align=ft.TextAlign.CENTER),
                     ft.Divider(),
-                    ft.ListTile(
-                        leading=ft.Icon(ft.Icons.OPEN_IN_BROWSER),
-                        title=ft.Text(menu_labels[0]),
-                        on_click=lambda e: print("Ir a " + menu_labels[0]),
-                    ),
-                    ft.ListTile(
-                        leading=ft.Icon(ft.Icons.OPEN_IN_BROWSER),
-                        title=ft.Text(menu_labels[1]),
-                        on_click=lambda e: print("Ir a " + menu_labels[1]),
-                    ),
-                    ft.ListTile(
-                        leading=ft.Icon(ft.Icons.FOLDER_OPEN),
-                        title=ft.Text(menu_labels[2]),
-                        on_click=lambda e: print("Ir a " + menu_labels[2]),
-                    ),
-                    ft.ListTile(
-                        leading=ft.Icon(ft.Icons.RECEIPT),
-                        title=ft.Text(menu_labels[3]),
-                        on_click=lambda e: print("Ir a " + menu_labels[3]),
-                    ),
-                    ft.ListTile(
-                        leading=ft.Icon(ft.Icons.RECEIPT_LONG),
-                        title=ft.Text(menu_labels[4]),
-                        on_click=lambda e: print("Ir a " + menu_labels[4]),
-                    ),
-                    ft.ListTile(
-                        leading=ft.Icon(ft.Icons.ATTACH_MONEY),
-                        title=ft.Text(menu_labels[5]),
-                        on_click=lambda e: print("Ir a " + menu_labels[5]),
-                    ),
+                    *[
+                        ft.ListTile(
+                            leading=ft.Icon(menu["icon"]),
+                            title=ft.Text(menu["label"]),
+                            on_click=lambda e, k=menu["key"]: set_content_area(k, None),
+                        )
+                        for menu in MENU_STRUCTURE
+                    ]
                 ],
                 spacing=0,
                 expand=True,
@@ -279,22 +369,26 @@ def run_gui():
             margin=0,
         )
 
-        def on_drag(e: ft.DragUpdateEvent):
-            nonlocal nav_rail
-            new_width = nav_rail.width + e.delta_x
-            if new_width < 60:
-                new_width = 60
-            if new_width > 300:
-                new_width = 300
-            nav_rail.width = new_width
-            nav_rail.update()
-
-        gesture = ft.GestureDetector(
-            content=ft.VerticalDivider(width=2, color="#888888"),  # Línea más delgada
-            drag_interval=10,
-            on_pan_update=on_drag,
-            on_hover=lambda e: (setattr(e.control, "mouse_cursor", ft.MouseCursor.RESIZE_LEFT_RIGHT), e.control.update()),
-        )
+        # Submenú dinámico (solo si el menú tiene submenús)
+        def get_submenu():
+            menu = next((m for m in MENU_STRUCTURE if m["key"] == current_area), None)
+            if menu and menu["submenus"]:
+                return ft.Container(
+                    content=ft.Column([
+                        ft.Text("Submenú", size=12, weight="bold"),
+                        *[
+                            ft.ListTile(
+                                title=ft.Text(sub["label"], bgcolor="#f7f7a1" if current_subkey == sub["key"] else None),
+                                on_click=lambda e, subk=sub["key"]: set_content_area(current_area, subk),
+                            )
+                            for sub in menu["submenus"]
+                        ]
+                    ], spacing=0),
+                    width=180,
+                    bgcolor="#f3f3f3",
+                    padding=10,
+                )
+            return ft.Container(width=0)
 
         # Estado para el directorio seleccionado y archivos
         selected_dir = None
@@ -638,11 +732,11 @@ def run_gui():
                 ft.Row(
                     controls=[
                         nav_rail,
-                        gesture,
+                        get_submenu(),
                         content_area,
                     ],
                     expand=True,
-                    spacing=0,  # Sin espacio entre columnas
+                    spacing=0,
                 ),
             ],
             expand=True,
@@ -650,35 +744,7 @@ def run_gui():
         )
 
         page.add(layout)
-        # No update_files_list() aquí, solo se actualiza tras seleccionar un directorio
-
-        # --- PDF Preview: Consideraciones ---
-        # 1. Flet actualmente NO incluye PdfViewer en su API pública estable.
-        # 2. Si usas Flet Desktop >=0.18.0 puedes probar con:
-        #    from flet_desktop_pdf import PdfViewer
-        #    Y luego usar PdfViewer(src=full_path)
-        # 3. Alternativas en Python:
-        #    - PyMuPDF (fitz): para extraer páginas y renderizarlas como imágenes.
-        #    - pdf2image: convierte páginas PDF a imágenes (requiere poppler).
-        #    - Muéstralas en Flet usando ft.Image.
-        # Ejemplo básico usando pdf2image (requiere instalar pdf2image y poppler):
-
-        # from pdf2image import convert_from_path
-        # def show_pdf_as_image(pdf_path):
-        #     images = convert_from_path(pdf_path, first_page=1, last_page=1)
-        #     if images:
-        #         img_path = os.path.join(tempfile.gettempdir(), "preview_page1.png")
-        #         images[0].save(img_path, "PNG")
-        #         pdf_viewer.content = ft.Image(src=img_path, expand=True)
-        #         pdf_viewer.visible = True
-        #         pdf_viewer.update()
-
-        # En show_preview, llama a show_pdf_as_image(full_path) para PDFs.
-
-        # Recomendación:
-        # - Para preview PDF multiplataforma, usa pdf2image + ft.Image.
-        # - Para solo texto, puedes extraer texto con PyMuPDF o pdfminer.
-        # - Si Flet agrega PdfViewer oficialmente, úsalo directamente.
+        update_content_area()
 
     ft.app(target=main)
 
