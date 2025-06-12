@@ -149,7 +149,7 @@ def run_gui():
             visible=False,
             width=0,
             height=36,
-            hint_text="Buscar...",
+            hint_text="Search ...",
             border_radius=8,
             content_padding=ft.padding.symmetric(horizontal=10),
             autofocus=True,
@@ -401,7 +401,7 @@ def run_gui():
             visible=True,  # Ahora siempre visible en la primera fila
             width=250,
             height=32,
-            hint_text="Buscar archivo...",
+            hint_text="Search file...",
             border_radius=8,
             content_padding=ft.padding.symmetric(horizontal=8),
             text_size=12,
