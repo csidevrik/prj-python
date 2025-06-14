@@ -62,7 +62,7 @@ class AppBarComponent:
         self.search_field.visible = True
         self.search_field.width = 250
         self.search_field.focus()
-        self.suggestions_dropdown.visible = False
+        self.suggestions_dropdown.visible = True
         self.search_field.update()
         self.suggestions_dropdown.update()
 
@@ -79,13 +79,13 @@ class AppBarComponent:
         return ft.Row([
             ft.IconButton(
                 ft.Icons.SEARCH,
-                icon_color="black",
+                icon_color=AppColors.ON_PRIMARY,
                 tooltip="Buscar",
                 on_click=self.expand_search
             ),
             ft.IconButton(
                 ft.Icons.MENU,
-                icon_color="black",
+                icon_color=AppColors.ON_PRIMARY,
                 tooltip="Menú",
                 on_click=self.on_menu_click
             ),
@@ -102,5 +102,5 @@ class AppBarComponent:
                 self.build_action_buttons(),
             ]),
             gradient=AppGradients.app_bar(),
-            padding=16
+            padding=1
         )

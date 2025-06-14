@@ -4,7 +4,7 @@ from config.theme import AppColors
 class NavRailComponent:
     def __init__(self, page: ft.Page):
         self.page = page
-        self.visible = True
+        self.visible = False
         self.width = 200
         self._container = None  # Referencia al container
         
@@ -16,11 +16,11 @@ class NavRailComponent:
     def build(self):
         self._container = ft.Container(
             content=ft.Column([
-                ft.Text("Menú", color=AppColors.ON_SURFACE, size=14),
+                ft.Text("Menú", color=AppColors.ON_BACKGROUND, size=14),
                 ft.Divider(),
                 # Aquí irán los items del menú
-            ], spacing=0),
-            bgcolor=AppColors.SURFACE,
+            ], spacing=1),
+            bgcolor=AppColors.BACKGROUND,
             visible=self.visible,
             width=self.width
         )

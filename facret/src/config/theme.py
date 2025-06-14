@@ -1,18 +1,19 @@
 import flet as ft
+import math
 
 class AppColors:
-    # Colores principales
-    BACKGROUND = "#DDD5D0"  # Fondo general
-    SURFACE = "#CFC0BD"    # Tarjetas, paneles
-    SECONDARY = "#B8B8AA"  # Elementos secundarios
-    PRIMARY = "#7F9183"    # AppBar, botones principales
-    ACCENT = "#586F6B"     # Botones destacados
+    # Colores del sistema usando una paleta coherente
+    BACKGROUND      = "#3CA5C5"  # Color de fondo base
+    SURFACE         = "#53aecc"    # Color para superficies elevadas (cards, paneles)
+    SECONDARY       = "#B8B8AA"  # Color para elementos secundarios
+    PRIMARY         = "#7F9183"    # Color principal (acciones importantes)
+    ACCENT          = "#586F6B"     # Color de acento (destacar elementos)
     
-    # Colores de texto
-    ON_PRIMARY = "#FFFFFF"    # Texto sobre primary
-    ON_SECONDARY = "#000000"  # Texto sobre secondary (con 87% opacidad)
-    ON_BACKGROUND = "#000000" # Texto sobre fondo (con 87% opacidad)
-    ON_SURFACE = "#000000"    # Texto sobre surface (con 87% opacidad)
+    # Colores para texto con contraste apropiado
+    ON_PRIMARY      = "#FFFFFF"    # Texto sobre color principal (blanco)
+    ON_SECONDARY    = "#000000"  # Texto sobre color secundario
+    ON_BACKGROUND   = "#000000" # Texto sobre fondo
+    ON_SURFACE      = "#000000"    # Texto sobre superficies
 
 class AppGradients:
     @staticmethod
@@ -20,7 +21,8 @@ class AppGradients:
         return ft.LinearGradient(
             begin=ft.alignment.center_left,
             end=ft.alignment.center_right,
-            colors=[AppColors.PRIMARY, AppColors.ACCENT]
+            colors=[AppColors.PRIMARY, AppColors.ACCENT],
+            rotation=math.pi/2
         )
     
     @staticmethod
@@ -41,7 +43,7 @@ class AppStyles:
         
         TITLE = {
             "size": 12,
-            "color": AppColors.ON_BACKGROUND,
+            "color": AppColors.ON_PRIMARY,
             "weight": "bold"
         }
     
