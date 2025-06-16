@@ -12,7 +12,7 @@ class AppColors:
     # Colores para texto con contraste apropiado
     ON_PRIMARY      = "#FFFFFF"    # Texto sobre color principal (blanco)
     ON_SECONDARY    = "#000000"  # Texto sobre color secundario
-    ON_BACKGROUND   = "#000000" # Texto sobre fondo
+    ON_BACKGROUND   = "#B9DEEC" # Texto sobre fondo
     ON_SURFACE      = "#000000"    # Texto sobre superficies
 
 class AppGradients:
@@ -36,13 +36,13 @@ class AppGradients:
 class AppStyles:
     class Text:
         BODY = {
-            "size": 10,
+            "size": 8,
             "color": AppColors.ON_BACKGROUND,
             "weight": "normal"
         }
         
         TITLE = {
-            "size": 12,
+            "size": 14,
             "color": AppColors.ON_PRIMARY,
             "weight": "bold"
         }

@@ -33,6 +33,24 @@ def run_gui():
 
         page.add(layout)
 
+        # Para reemplazar el logo de Flet en la AppBar:
+        # 1. Usa un archivo de imagen local (ej: "assets/logo.png") o un SVG.
+        # 2. Cambia el parámetro 'leading' de tu AppBar o Container por un ft.Image o ft.Image.asset.
+
+        custom_bar_content = ft.Row(
+            [
+                # Reemplaza el icono por tu logo personalizado
+                ft.Image(
+                    src="assets/favicon.png",  # Cambia la ruta a tu logo
+                    width=32,
+                    height=32,
+                    fit=ft.ImageFit.CONTAIN,
+                ),
+                # ...existing code...
+            ],
+            # ...existing code...
+        )
+
     ft.app(target=main)
 
 # ¿Qué es Flet Desktop?
