@@ -1,5 +1,13 @@
 [
     {
+        "name": "default",
+        "colors": ["#3CA5C5", "#1E88E5"]
+    },
+    {
+        "name": "secondary",
+        "colors": ["#7F9183", "#586F6B"]
+    },
+    {
         "name": "Omolon",
         "colors": ["#091E3A", "#2F80ED", "#2D9EE0"]
     },

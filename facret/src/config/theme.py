@@ -44,6 +44,14 @@ class GradientLibrary:
 
     def list_gradients(self):
         return list(self.gradients.keys())
+    
+    @staticmethod
+    def get_default_gradient():
+        return ft.LinearGradient(
+            begin=ft.Alignment(-1, 0),  # Inicio del gradiente (izquierda)
+            end=ft.Alignment(1, 0),    # Fin del gradiente (derecha)
+            colors=["#3CA5C5", "#1E88E5"],  # Colores del gradiente
+        )
 
 # Ejemplo de inicialización global (ajusta la ruta según tu estructura)
 GRADIENT_JSON_PATH = os.path.join(os.path.dirname(__file__), "gradients.json")
