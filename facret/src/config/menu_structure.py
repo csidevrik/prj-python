@@ -4,7 +4,7 @@ MENU_STRUCTURE = [
     {
         "key": "home",
         "icon": ft.Icons.HOME,
-        "label": "Inicio",
+        "label": "Home",
         "submenus": []  # <- submenús vacíos
     },
     {

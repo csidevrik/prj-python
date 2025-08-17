@@ -3,17 +3,18 @@ import math
 
 class AppColors:
     # Colores del sistema usando una paleta coherente
-    BACKGROUND      = "#3CA5C5"  # Color de fondo base
-    SURFACE         = "#53aecc"    # Color para superficies elevadas (cards, paneles)
-    SECONDARY       = "#B8B8AA"  # Color para elementos secundarios
-    PRIMARY         = "#7F9183"    # Color principal (acciones importantes)
+    BACKGROUND      = "#3CA5C5"     # Color de fondo base
+    SURFACE         = "#53aecc"     # Color para superficies elevadas (cards, paneles)
+    SECONDARY       = "#B8B8AA"     # Color para elementos secundarios
+    PRIMARY         = "#7F9183"     # Color principal (acciones importantes)
     ACCENT          = "#586F6B"     # Color de acento (destacar elementos)
     
     # Colores para texto con contraste apropiado
-    ON_PRIMARY      = "#FFFFFF"    # Texto sobre color principal (blanco)
-    ON_SECONDARY    = "#000000"  # Texto sobre color secundario
-    ON_BACKGROUND   = "#B9DEEC" # Texto sobre fondo
-    ON_SURFACE      = "#000000"    # Texto sobre superficies
+    ON_BACKGROUND   = "#B9DEEC"     # Texto sobre fondo
+    ON_SURFACE      = "#000000"     # Texto sobre superficies
+    ON_SECONDARY    = "#000000"     # Texto sobre color secundario
+    ON_PRIMARY      = "#FFFFFF"     # Texto sobre color principal (blanco)
+    ON_ACCENT       = "#FFFFFF"     # Texto sobre color de acento
 
 class AppGradients:
     @staticmethod
