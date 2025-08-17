@@ -101,6 +101,7 @@ class AppBarComponent:
                 ft.Stack([search_field, suggestions_dropdown]),
                 self.build_action_buttons(),
             ]),
-            gradient=AppGradients.app_bar(),
+            # gradient=AppGradients.app_bar(),
+            gradient=AppGradients.by_name("Omolon"),
             padding=1
         )

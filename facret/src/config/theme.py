@@ -1,5 +1,7 @@
 import flet as ft
 import math
+import json
+import os
 
 class AppColors:
     # Colores del sistema usando una paleta coherente
@@ -16,7 +18,41 @@ class AppColors:
     ON_PRIMARY      = "#FFFFFF"     # Texto sobre color principal (blanco)
     ON_ACCENT       = "#FFFFFF"     # Texto sobre color de acento
 
+class GradientLibrary:
+    """
+    Permite cargar gradientes desde un archivo JSON y acceder a ellos por nombre.
+    El JSON debe tener el formato: [{"name": "...", "colors": ["#hex1", "#hex2", ...]}, ...]
+    """
+    def __init__(self, json_path=None):
+        self.gradients = {}
+        if json_path and os.path.exists(json_path):
+            with open(json_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                for grad in data:
+                    self.gradients[grad["name"]] = grad["colors"]
+
+    def get_gradient(self, name, begin=ft.alignment.top_left, end=ft.alignment.bottom_right, rotation=None):
+        colors = self.gradients.get(name)
+        if not colors:
+            raise ValueError(f"Gradient '{name}' not found.")
+        return ft.LinearGradient(
+            begin=begin,
+            end=end,
+            colors=colors,
+            rotation=rotation
+        )
+
+    def list_gradients(self):
+        return list(self.gradients.keys())
+
+# Ejemplo de inicialización global (ajusta la ruta según tu estructura)
+GRADIENT_JSON_PATH = os.path.join(os.path.dirname(__file__), "gradients.json")
+gradient_lib = GradientLibrary(GRADIENT_JSON_PATH)
+
 class AppGradients:
+    # Instancia de GradientLibrary para cargar gradientes desde el JSON
+    gradient_library = GradientLibrary(GRADIENT_JSON_PATH)
+
     @staticmethod
     def app_bar():
         return ft.LinearGradient(
@@ -33,6 +69,11 @@ class AppGradients:
             end=ft.alignment.bottom_right,
             colors=[AppColors.BACKGROUND, AppColors.SURFACE]
         )
+    
+    @staticmethod
+    def by_name(name, begin=ft.alignment.top_left, end=ft.alignment.bottom_right, rotation=None):
+        # Utiliza la instancia de GradientLibrary para obtener un gradiente por nombre
+        return AppGradients.gradient_library.get_gradient(name, begin, end, rotation)
 
 class AppStyles:
     class Text:
@@ -84,6 +125,5 @@ class AppStyles:
         }
 
 # Ejemplo de uso:
-# ft.Text("Título", **AppStyles.Text.TITLE)
-# ft.ElevatedButton("Botón", **AppStyles.Button.PRIMARY)
+# ft.Container(gradient=AppGradients.by_name("Omolon"))
 # ft.Container(**AppStyles.Container.CARD)
