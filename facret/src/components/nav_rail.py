@@ -1,86 +1,122 @@
 import flet as ft
-from config.theme import AppColors
+from config.theme import AppColors, AppStyles
 from config.menu_structure import MenuStructure
-from config.theme import AppStyles
+
 
 class NavRailComponent:
-    def __init__(self, page: ft.Page):
+    """
+    Componente de navegación lateral para Flet 0.28+ (sin UserControl).
+    Expone:
+      - .view  -> el Control (Container) que debes añadir al layout
+      - .toggle() / .update() / .on_menu_click() / .on_submenu_click()
+    """
+    def __init__(self, page: ft.Page, visible: bool = False, width: int = 200):
         self.page = page
-        self.visible = False
-        self.width = 200
-        self._container = None  # Referencia al container
+        self.visible = visible
+        self.width = width
+
         self.selected_menu = None
         self.selected_submenu = None
-        
+
+        # Controles internos que reusamos al refrescar
+        self._container: ft.Container | None = None
+        self._column: ft.Column | None = None
+
+        # Construimos la vista inicial
+        self.view = self._build()
+
+    # API pública
+    def toggle(self):
+        self.visible = not self.visible
+        self.update()
+
     def update(self):
-        if self._container:
-            self._container.visible = self.visible
-            self._container.update()
-        
-    def build(self):
-        menu_items = MenuStructure().items
-        # Inicializa el primer menú como seleccionado si ninguno está seleccionado
+        """Refresca contenido y visibilidad."""
+        self._build(update_only=True)
+
+    def on_menu_click(self, key: str):
+        self.selected_menu = key
+        self.selected_submenu = None
+        self.update()
+
+    def on_submenu_click(self, key: str):
+        self.selected_submenu = key
+        self.update()
+
+    # ---- Implementación interna ----
+    def _build(self, update_only: bool = False) -> ft.Container:
+        menu_items = MenuStructure().items or []
+
+        # Seleccionar el primer menú por defecto
         if self.selected_menu is None and menu_items:
             self.selected_menu = menu_items[0]["key"]
 
-        menu_tiles = []
-
-        def make_menu_onclick(menu_key):
+        # Handlers
+        def make_menu_onclick(menu_key: str):
             def handler(e):
                 self.selected_menu = menu_key
                 self.selected_submenu = None
-                self.page.update()
+                self._refresh_controls()
             return handler
 
-        def make_submenu_onclick(submenu_key):
+        def make_submenu_onclick(submenu_key: str):
             def handler(e):
                 self.selected_submenu = submenu_key
-                self.page.update()
+                self._refresh_controls()
             return handler
 
+        # Construir tiles del menú
+        tiles: list[ft.Control] = []
         for item in menu_items:
             is_selected = self.selected_menu == item["key"]
-            menu_tiles.append(
+            tiles.append(
                 ft.ListTile(
-                    title=ft.Text(item['label'], color=AppColors.ON_BACKGROUND),
-                    leading=ft.Icon(item['icon']),
+                    title=ft.Text(item["label"], color=AppColors.ON_BACKGROUND),
+                    leading=ft.Icon(item["icon"]),
                     selected=is_selected,
                     bgcolor="blue100" if is_selected else None,
-                    on_click=make_menu_onclick(item["key"])
+                    on_click=make_menu_onclick(item["key"]),
                 )
             )
-            # Mostrar submenús solo si este menú está seleccionado y tiene submenús
+
+            # Submenús visibles sólo si el menú está seleccionado
             if is_selected and item.get("submenus"):
                 for submenu in item["submenus"]:
                     is_sub_selected = self.selected_submenu == submenu["key"]
-                    menu_tiles.append(
+                    tiles.append(
                         ft.ListTile(
-                            title=ft.Text("    " + submenu['label'], color=AppColors.ON_BACKGROUND),
+                            title=ft.Text("    " + submenu["label"], color=AppColors.ON_BACKGROUND),
                             leading=ft.Icon(ft.Icons.ARROW_RIGHT),
                             selected=is_sub_selected,
                             bgcolor="blue200" if is_sub_selected else "blue50",
-                            on_click=make_submenu_onclick(submenu["key"])
+                            on_click=make_submenu_onclick(submenu["key"]),
                         )
                     )
 
-        self._container = ft.Container(
-            content=ft.Column([
-                ft.Text("TOOLS",**AppStyles.Text.TITLE),
-                ft.Divider(),
-                # Aquí irán los items del menú
-                *menu_tiles
-            ], spacing=1),
-            bgcolor=AppColors.BACKGROUND,
-            visible=self.visible,
-            width=self.width
-        )
+        # Primera creación
+        if not update_only or self._container is None:
+            self._column = ft.Column(controls=tiles, spacing=1)
+            self._container = ft.Container(
+                content=self._column,
+                bgcolor=AppColors.BACKGROUND,
+                visible=self.visible,
+                width=self.width,
+            )
+            return self._container
+
+        # Modo actualización (reusar controles y sólo cambiar props)
+        if self._column is not None:
+            self._column.controls = tiles
+        if self._container is not None:
+            self._container.visible = self.visible
+            self._container.width = self.width
+            self._container.update()
         return self._container
 
-    def on_menu_click(self, key):
-        self.selected_menu = key
-        self.selected_submenu = None
-        self.page.update()
-
-    def on_submenu_click(self, key):
-        self.selected_submenu = key
-        self.page.update()
+    def _refresh_controls(self):
+        """Reconstruye el contenido y actualiza la página."""
+        self._build(update_only=True)
+        # Si prefieres actualizar sólo el contenedor:
+        # self._container.update()
+        # Si necesitas refrescar toda la página:
+        # self.page.update()
