@@ -25,6 +25,9 @@ class NavRailComponent:
         # Construimos la vista inicial
         self.view = self._build()
 
+    def build(self):
+        return self.view
+    
     # API pública
     def toggle(self):
         self.visible = not self.visible
@@ -40,7 +43,7 @@ class NavRailComponent:
         self.update()
 
     def on_submenu_click(self, key: str):
-        self.selected_submenu = key
+        self.selected_submenu = key 
         self.update()
 
     # ---- Implementación interna ----
@@ -74,7 +77,7 @@ class NavRailComponent:
                     title=ft.Text(item["label"], color=AppColors.ON_BACKGROUND),
                     leading=ft.Icon(item["icon"]),
                     selected=is_selected,
-                    bgcolor="blue100" if is_selected else None,
+                    bgcolor=AppColors.BACKGROUND if is_selected else None,
                     on_click=make_menu_onclick(item["key"]),
                 )
             )
@@ -88,7 +91,7 @@ class NavRailComponent:
                             title=ft.Text("    " + submenu["label"], color=AppColors.ON_BACKGROUND),
                             leading=ft.Icon(ft.Icons.ARROW_RIGHT),
                             selected=is_sub_selected,
-                            bgcolor="blue200" if is_sub_selected else "blue50",
+                            bgcolor=AppColors.BACKGROUND if is_sub_selected else AppColors.PRIMARY,
                             on_click=make_submenu_onclick(submenu["key"]),
                         )
                     )

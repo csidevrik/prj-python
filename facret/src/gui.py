@@ -1,21 +1,23 @@
 import flet as ft
-from components.app_bar import AppBarComponent
-from components.nav_rail import NavRailComponent
-from components.file_explorer import FileExplorerComponent
-from components.preview_panel import PreviewPanel
+from components.app_bar         import AppBarComponent
+from components.nav_rail        import NavRailComponent
+from components.file_explorer   import FileExplorerComponent
+from components.preview_panel   import PreviewPanel
+
 from config.theme import AppGradients
 
 def run_gui():
     def main(page: ft.Page):
+        page.window.icon = "../assets/favicon.ico"
         def toggle_nav_rail(e=None):  # Añadir parámetro e=None
             nav_rail.visible = not nav_rail.visible
             nav_rail.update()
         
         # Inicializar componentes
-        app_bar = AppBarComponent(page, on_menu_click=toggle_nav_rail)
-        nav_rail = NavRailComponent(page)
-        file_explorer = FileExplorerComponent(page)
-        preview = PreviewPanel()
+        app_bar         = AppBarComponent(page, on_menu_click=toggle_nav_rail)
+        nav_rail        = NavRailComponent(page)
+        file_explorer   = FileExplorerComponent(page)
+        preview         = PreviewPanel()
 
         # Layout principal
         layout = ft.Column([
@@ -41,7 +43,7 @@ def run_gui():
             [
                 # Reemplaza el icono por tu logo personalizado
                 ft.Image(
-                    src="assets/favicon.png",  # Cambia la ruta a tu logo
+                    src="../assets/favicon.png",  # Cambia la ruta a tu logo
                     width=32,
                     height=32,
                     fit=ft.ImageFit.CONTAIN,

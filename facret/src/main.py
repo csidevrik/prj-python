@@ -5,11 +5,11 @@ from config.theme import AppGradients
 
 
 def main(page: ft.Page):
-    # Icono de ventana (ajusta la ruta según tu estructura real)
+
     page.window.icon = "../assets/favicon.ico"
 
     # Usar barra de título estándar
-    page.window.frameless = False
+    page.window.frameless = True
 
     # Identificador de ventana (Windows)
     hwnd = ctypes.windll.user32.GetForegroundWindow()
