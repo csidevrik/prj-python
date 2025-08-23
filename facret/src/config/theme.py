@@ -18,6 +18,13 @@ class AppColors:
     ON_PRIMARY      = "#FFFFFF"     # Texto sobre color principal (blanco)
     ON_ACCENT       = "#FFFFFF"     # Texto sobre color de acento
 
+    # Colorea para el navrail
+    NAV_BG = "#3ca5c5"                 # fondo del rail
+    NAV_ITEM_BG = "#3ca5c5"            # fondo ítem normal
+    NAV_ITEM_SELECTED_BG = "#1f2937"   # fondo ítem seleccionado
+    NAV_TEXT = "#cbd5e1"
+    NAV_TEXT_SELECTED = "#ffffff"
+
 class GradientLibrary:
     """
     Permite cargar gradientes desde un archivo JSON y acceder a ellos por nombre.

@@ -74,10 +74,19 @@ class NavRailComponent:
             is_selected = self.selected_menu == item["key"]
             tiles.append(
                 ft.ListTile(
-                    title=ft.Text(item["label"], color=AppColors.ON_BACKGROUND),
-                    leading=ft.Icon(item["icon"]),
+                    title=ft.Text(
+                        item["label"], 
+                        color=AppColors.NAV_TEXT_SELECTED if is_selected else AppColors.NAV_TEXT,
+                        weight=ft.FontWeight.BOLD if is_selected else ft.FontWeight.NORMAL,
+                    ),
+                    leading=ft.Icon(
+                        item["icon"],
+                        color=AppColors.NAV_TEXT_SELECTED if is_selected else AppColors.NAV_TEXT
+                    ),
+                    dense=True,
                     selected=is_selected,
-                    bgcolor=AppColors.BACKGROUND if is_selected else None,
+                    selected_tile_color=AppColors.NAV_ITEM_SELECTED_BG,
+                    bgcolor=AppColors.NAV_ITEM_SELECTED_BG if is_selected else AppColors.NAV_ITEM_BG,
                     on_click=make_menu_onclick(item["key"]),
                 )
             )
