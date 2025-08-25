@@ -1,6 +1,6 @@
 import flet as ft
 import ctypes
-from components.nav_rail import NavRail  # Importar la clase NavRail desde components.nav_rail
+from components.nav_rail import NavRailComponent  # Importar la clase NavRail desde components.nav_rail
 from config.theme import AppGradients  # Importar AppGradients para usar el método by_name
 
 def main(page: ft.Page):
@@ -29,7 +29,7 @@ def main(page: ft.Page):
         ctypes.windll.user32.PostMessageW(hwnd, 0x0010, 0, 0)  # WM_CLOSE
 
     # Crear una instancia del menú lateral
-    nav_rail = NavRail(visible=False)  # Inicialmente oculto
+    nav_rail = NavRailComponent(page=page, visible=False)  # Inicialmente oculto
 
 
     # Función para alternar la visibilidad del menú lateral
@@ -71,7 +71,7 @@ def main(page: ft.Page):
     page.add(
         ft.Row(
             controls=[
-                nav_rail,  # Agregar el menú lateral
+                nav_rail.build(),  # Agregar el menú lateral
                 ft.Column(
                     controls=[
                         custom_title_bar,
