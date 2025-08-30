@@ -3,6 +3,7 @@ from components.app_bar         import AppBarComponent
 from components.nav_rail        import NavRailComponent
 from components.file_explorer   import FileExplorerComponent
 from components.preview_panel   import PreviewPanel
+from pages.general_page         import GeneralAppearancePage, GeneralFilesPage
 
 from config.theme import AppGradients
 
@@ -18,6 +19,7 @@ def run_gui():
         nav_rail        = NavRailComponent(page)
         file_explorer   = FileExplorerComponent(page)
         preview         = PreviewPanel()
+        general_page    = GeneralFilesPage()
 
         # Layout principal
         layout = ft.Column([
@@ -28,7 +30,8 @@ def run_gui():
                 ft.Row([
                     file_explorer.build(),
                     ft.VerticalDivider(width=1),
-                    preview.build(),
+                    # preview.build(),
+                    general_page.build(),
                 ], expand=True),
             ], expand=True),
         ], expand=True)

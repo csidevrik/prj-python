@@ -2,11 +2,10 @@
 # components/content_router.py
 # =============================
 import flet as ft
-from flet import UserControl
 from pages.general_page import GeneralAppearancePage, GeneralFilesPage
 from pages.notifications_page import InboxAlertsPage, FocusAssistPage
 
-class ContentRouter(UserControl):
+class ContentRouter:
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page

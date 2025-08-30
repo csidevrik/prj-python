@@ -4,6 +4,7 @@ from components.nav_rail import NavRailComponent  # Importar la clase NavRail de
 from config.theme import AppGradients  # Importar AppGradients para usar el método by_name
 
 def main(page: ft.Page):
+    page.window.icon = "../assets/favicon.ico"
     # Configurar la ventana con barra superior estándar
     page.window.frameless = False  # Activar la barra de título estándar del sistema operativo
 

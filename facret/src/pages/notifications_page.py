@@ -1,7 +1,7 @@
 import flet as ft
-from flet import UserControl
 
-class InboxAlertsPage(UserControl):
+
+class InboxAlertsPage:
     def build(self):
         return ft.Column([
             ft.Text("Inbox alerts", size=22, weight=ft.FontWeight.W_600),
@@ -9,7 +9,7 @@ class InboxAlertsPage(UserControl):
             ft.Switch(label="Show badges on taskbar", value=True),
             ft.Switch(label="Play notification sound", value=False),
         ], expand=True)
-class FocusAssistPage(UserControl):
+class FocusAssistPage:
     def build(self):
         return ft.Column([
             ft.Text("Focus assist", size=22, weight=ft.FontWeight.W_600),

@@ -11,8 +11,8 @@ def run_gui():
     def main(page: ft.Page):
         page.title = "FACRET"
         page.window.icon = "../assets/favicon.ico"
-        page.theme_mode = ft.ThemeMode.SYSTEM
-        page.padding = 0
+        # page.theme_mode = ft.ThemeMode.SYSTEM
+        # page.padding = 0
 
         router = ContentRouter(page)
 
