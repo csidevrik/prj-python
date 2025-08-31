@@ -37,19 +37,19 @@ class DriveContentComponent:
                 ft.Container(expand=True),
                 ft.Row([
                     ft.IconButton(
-                        icon=ft.icons.VIEW_MODULE if self.view_mode == "grid" else ft.icons.VIEW_MODULE_OUTLINED,
+                        icon=ft.Icons.VIEW_MODULE if self.view_mode == "grid" else ft.Icons.VIEW_MODULE_OUTLINED,
                         tooltip="Vista en cuadrícula",
                         on_click=lambda e: self._change_view("grid"),
                         icon_color=DriveTheme.PRIMARY_BLUE if self.view_mode == "grid" else DriveTheme.GREY_600,
                     ),
                     ft.IconButton(
-                        icon=ft.icons.VIEW_LIST if self.view_mode == "list" else ft.icons.VIEW_LIST_OUTLINED,
+                        icon=ft.Icons.VIEW_LIST if self.view_mode == "list" else ft.Icons.VIEW_LIST_OUTLINED,
                         tooltip="Vista de lista",
                         on_click=lambda e: self._change_view("list"),
                         icon_color=DriveTheme.PRIMARY_BLUE if self.view_mode == "list" else DriveTheme.GREY_600,
                     ),
                     ft.IconButton(
-                        icon=ft.icons.INFO_OUTLINE,
+                        icon=ft.Icons.INFO_OUTLINE,
                         tooltip="Información",
                         icon_color=DriveTheme.GREY_600,
                     ),
@@ -111,7 +111,7 @@ class DriveContentComponent:
         if file_data["shared"]:
             column_items.append(
                 ft.Container(
-                    content=ft.Icon(ft.icons.PEOPLE, size=16, color=DriveTheme.GREY_600),
+                    content=ft.Icon(ft.Icons.PEOPLE, size=16, color=DriveTheme.GREY_600),
                     alignment=ft.alignment.center_right,
                 )
             )
@@ -125,7 +125,8 @@ class DriveContentComponent:
             **DriveTheme.get_card_style(),
             padding=16,
             on_click=lambda e, f=file_data: self._on_file_click(f),
-            animate=ft.animation.Animation(200, ft.AnimationCurve.EASE_IN_OUT),
+            animate=ft.Animation(200, ft.AnimationCurve.EASE_IN_OUT),
+            # animate=ft.animation.Animation(200, ft.AnimationCurve.EASE_IN_OUT),
         )
     
     def _create_file_row(self, file_data):
@@ -134,9 +135,9 @@ class DriveContentComponent:
         # Construir elementos trailing dinámicamente
         trailing_items = []
         if file_data["shared"]:
-            trailing_items.append(ft.Icon(ft.icons.PEOPLE, size=16, color=DriveTheme.GREY_600))
+            trailing_items.append(ft.Icon(ft.Icons.PEOPLE, size=16, color=DriveTheme.GREY_600))
         trailing_items.append(ft.IconButton(
-            icon=ft.icons.MORE_VERT,
+            icon=ft.Icons.MORE_VERT,
             icon_size=16,
             icon_color=DriveTheme.GREY_600,
         ))
@@ -158,24 +159,24 @@ class DriveContentComponent:
         )
     
     def _get_file_icon(self, file_type):
-        icons = {
-            "folder": ft.icons.FOLDER,
-            "pdf": ft.icons.PICTURE_AS_PDF,
-            "presentation": ft.icons.SLIDESHOW,
-            "spreadsheet": ft.icons.TABLE_CHART,
-            "archive": ft.icons.ARCHIVE,
+        Icons = {
+            "folder": ft.Icons.FOLDER,
+            "pdf": ft.Icons.PICTURE_AS_PDF,
+            "presentation": ft.Icons.SLIDESHOW,
+            "spreadsheet": ft.Icons.TABLE_CHART,
+            "archive": ft.Icons.ARCHIVE,
         }
-        return icons.get(file_type, ft.icons.INSERT_DRIVE_FILE)
+        return Icons.get(file_type, ft.Icons.INSERT_DRIVE_FILE)
     
     def _get_file_color(self, file_type):
-        colors = {
-            "folder": ft.colors.BLUE_600,
-            "pdf": ft.colors.RED_600,
-            "presentation": ft.colors.ORANGE_600,
-            "spreadsheet": ft.colors.GREEN_600,
-            "archive": ft.colors.PURPLE_600,
+        Colors = {
+            "folder": ft.Colors.BLUE_600,
+            "pdf": ft.Colors.RED_600,
+            "presentation": ft.Colors.ORANGE_600,
+            "spreadsheet": ft.Colors.GREEN_600,
+            "archive": ft.Colors.PURPLE_600,
         }
-        return colors.get(file_type, DriveTheme.GREY_600)
+        return Colors.get(file_type, DriveTheme.GREY_600)
     
     def _change_view(self, mode):
         self.view_mode = mode

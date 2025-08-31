@@ -17,7 +17,7 @@ class DriveSidebarComponent:
                 ft.Container(
                     content=ft.ElevatedButton(
                         content=ft.Row([
-                            ft.Icon(ft.icons.ADD, size=20),
+                            ft.Icon(ft.Icons.ADD, size=20),
                             ft.Text("Nuevo", size=14, weight=ft.FontWeight.W_500),
                         ], spacing=8, tight=True),
                         style=ft.ButtonStyle(
@@ -25,7 +25,7 @@ class DriveSidebarComponent:
                             padding=ft.padding.symmetric(horizontal=24, vertical=12),
                             bgcolor=DriveTheme.SURFACE_WHITE,
                             color=DriveTheme.GREY_800,
-                            shadow_color=ft.colors.with_opacity(0.15, ft.colors.BLACK),
+                            shadow_color=ft.Colors.with_opacity(0.15, ft.Colors.BLACK),
                             elevation=2,
                         ),
                         on_click=self._on_new_click,
@@ -35,13 +35,13 @@ class DriveSidebarComponent:
                 
                 # Menú de navegación
                 ft.Column([
-                    self._create_nav_item("home", ft.icons.HOME_OUTLINED, "Página principal", True),
-                    self._create_nav_item("my_drive", ft.icons.FOLDER_OUTLINED, "Mi unidad"),
-                    self._create_nav_item("computers", ft.icons.COMPUTER_OUTLINED, "Ordenadores"),
-                    self._create_nav_item("shared", ft.icons.PEOPLE_OUTLINED, "Compartido conmigo"),
-                    self._create_nav_item("recent", ft.icons.ACCESS_TIME, "Reciente"),
-                    self._create_nav_item("starred", ft.icons.STAR_OUTLINE, "Destacados"),
-                    self._create_nav_item("trash", ft.icons.DELETE_OUTLINE, "Papelera"),
+                    self._create_nav_item("home", ft.Icons.HOME_OUTLINED, "Página principal", True),
+                    self._create_nav_item("my_drive", ft.Icons.FOLDER_OUTLINED, "Mi unidad"),
+                    self._create_nav_item("computers", ft.Icons.COMPUTER_OUTLINED, "Ordenadores"),
+                    self._create_nav_item("shared", ft.Icons.PEOPLE_OUTLINED, "Compartido conmigo"),
+                    self._create_nav_item("recent", ft.Icons.ACCESS_TIME, "Reciente"),
+                    self._create_nav_item("starred", ft.Icons.STAR_OUTLINE, "Destacados"),
+                    self._create_nav_item("trash", ft.Icons.DELETE_OUTLINE, "Papelera"),
                 ], spacing=4),
                 
                 ft.Divider(height=1, color=DriveTheme.GREY_200),
@@ -53,7 +53,7 @@ class DriveSidebarComponent:
                         ft.Container(
                             content=ft.Column([
                                 ft.Row([
-                                    ft.Icon(ft.icons.CLOUD_OUTLINED, size=16, color=DriveTheme.GREY_600),
+                                    ft.Icon(ft.Icons.CLOUD_OUTLINED, size=16, color=DriveTheme.GREY_600),
                                     ft.Text("15 GB utilizados de 15 GB", size=12, color=DriveTheme.GREY_600),
                                 ], spacing=8),
                                 ft.Container(
@@ -90,7 +90,7 @@ class DriveSidebarComponent:
                 ),
                 on_click=lambda e, k=key: self._on_nav_click(k),
             ),
-            bgcolor=ft.colors.with_opacity(0.1, DriveTheme.PRIMARY_BLUE) if is_selected else None,
+            bgcolor=ft.Colors.with_opacity(0.1, DriveTheme.PRIMARY_BLUE) if is_selected else None,
             # border_radius=0,
             margin=ft.margin.symmetric(horizontal=8),
             border_radius=8,

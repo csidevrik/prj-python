@@ -2,11 +2,12 @@
 # drive_gui.py
 # =============================
 import flet as ft
-from components.drive_header import DriveHeaderComponent
-from components.drive_sidebar import DriveSidebarComponent
-from components.drive_content import DriveContentComponent
-from components.sync_status import SyncStatusComponent
-from config.drive_theme import DriveTheme
+from components.drive_header                import DriveHeaderComponent
+from components.drive_sidebar               import DriveSidebarComponent
+from components.drive_content               import DriveContentComponent
+from components.sync_status                 import SyncStatusComponent
+from components.header.responsive_header    import ResponsiveDriveHeader as ResponsiveHeaderComponent
+from config.drive_theme                     import DriveTheme
 
 def run_drive_gui():
     def main(page: ft.Page):
@@ -19,12 +20,13 @@ def run_drive_gui():
         page.theme_mode = ft.ThemeMode.LIGHT
         
         # Aplicar tema personalizado
-        page.theme = DriveTheme.get_theme()
+        page.theme  = DriveTheme.get_theme()
         
         # Componentes principales
-        header = DriveHeaderComponent(page)
-        sidebar = DriveSidebarComponent(page)
-        content = DriveContentComponent(page)
+        # header      = DriveHeaderComponent(page)
+        header      = ResponsiveHeaderComponent(page)
+        sidebar     = DriveSidebarComponent(page)
+        content     = DriveContentComponent(page)
         sync_status = SyncStatusComponent(page)
         
         # Layout principal
@@ -46,7 +48,7 @@ def run_drive_gui():
                         content.build(),
                     ], spacing=0),
                     expand=True,
-                    bgcolor=ft.colors.GREY_50,
+                    bgcolor=ft.Colors.GREY_50,
                 )
             ], spacing=0, expand=True)
             

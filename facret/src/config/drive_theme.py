@@ -28,7 +28,7 @@ class DriveTheme:
             "shadow": ft.BoxShadow(
                 spread_radius=0,
                 blur_radius=8,
-                color=ft.colors.with_opacity(0.1, ft.colors.BLACK),
+                color=ft.Colors.with_opacity(0.1, ft.Colors.BLACK),
                 offset=ft.Offset(0, 2),
             )
         }

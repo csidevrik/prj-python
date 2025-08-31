@@ -16,14 +16,14 @@ class DriveHeaderComponent:
                 ft.Row([
                     ft.Container(
                         content=ft.Icon(
-                            ft.icons.FOLDER_SPECIAL,
+                            ft.Icons.FOLDER_SPECIAL,
                             color=DriveTheme.PRIMARY_BLUE,
-                            size=32
+                            size=22
                         ),
                         padding=8,
                     ),
                     ft.Text(
-                        "Drive",
+                        "Facret Drive",
                         size=22,
                         weight=ft.FontWeight.W_400,
                         color=DriveTheme.GREY_600
@@ -33,8 +33,8 @@ class DriveHeaderComponent:
                 # Barra de búsqueda
                 ft.Container(
                     content=ft.TextField(
-                        hint_text="Buscar en Drive",
-                        prefix_icon=ft.icons.SEARCH,
+                        hint_text="Search on Folder",
+                        prefix_icon=ft.Icons.SEARCH,
                         filled=True,
                         fill_color=DriveTheme.GREY_100,
                         border_radius=24,
@@ -49,18 +49,18 @@ class DriveHeaderComponent:
                 # Controles de usuario
                 ft.Row([
                     ft.IconButton(
-                        icon=ft.icons.HELP_OUTLINE,
+                        icon=ft.Icons.HELP_OUTLINE,
                         tooltip="Ayuda",
                         icon_color=DriveTheme.GREY_600,
                     ),
                     ft.IconButton(
-                        icon=ft.icons.SETTINGS_OUTLINED,
+                        icon=ft.Icons.SETTINGS_OUTLINED,
                         tooltip="Configuración",
                         icon_color=DriveTheme.GREY_600,
                     ),
                     ft.Container(
                         content=ft.CircleAvatar(
-                            content=ft.Text("U", color=ft.colors.WHITE),
+                            content=ft.Text("U", color=ft.Colors.WHITE),
                             bgcolor=DriveTheme.PRIMARY_BLUE,
                             radius=16,
                         ),

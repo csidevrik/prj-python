@@ -13,7 +13,7 @@ class SyncStatusComponent:
         if self.is_synced:
             return ft.Container(
                 content=ft.Row([
-                    ft.Icon(ft.icons.CLOUD_DONE, color=ft.colors.GREEN_600, size=20),
+                    ft.Icon(ft.Icons.CLOUD_DONE, color=ft.Colors.GREEN_600, size=20),
                     ft.Text(
                         "Tus archivos están actualizados",
                         size=14,
@@ -34,5 +34,5 @@ class SyncStatusComponent:
                     )
                 ], spacing=8),
                 padding=ft.padding.symmetric(horizontal=24, vertical=16),
-                bgcolor=ft.colors.BLUE_50,
+                bgcolor=ft.Colors.BLUE_50,
             )
