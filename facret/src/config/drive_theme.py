@@ -10,8 +10,11 @@ class DriveTheme:
     GREY_50 = "#f8f9fa"
     GREY_100 = "#f1f3f4"
     GREY_200 = "#e8eaed"
+    GREY_400 = "#bdbdbd"
     GREY_600 = "#5f6368"
+    GREY_700 = "#202124"
     GREY_800 = "#3c4043"
+
     
     @staticmethod
     def get_theme():
