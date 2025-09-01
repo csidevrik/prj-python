@@ -90,6 +90,27 @@ class AppGradients:
         # Utiliza la instancia de GradientLibrary para obtener un gradiente por nombre
         return AppGradients.gradient_library.get_gradient(name, begin, end, rotation)
 
+class AppTheme:
+    # Colores principales
+    PRIMARY_COLOR = "#00BCD4"  # Cyan
+    SECONDARY_COLOR = "#FFC107"  # Amber
+    BACKGROUND_COLOR = "#F5F5F5"
+    SURFACE_COLOR = "#FFFFFF"
+    
+    # Colores de texto
+    TEXT_PRIMARY = "#212121"
+    TEXT_SECONDARY = "#757575"
+    
+    # Colores de sidebar
+    SIDEBAR_ACTIVE_COLOR = "#B0BEC5"
+    SIDEBAR_HOVER_COLOR = "#E0F2F1"
+    
+    @staticmethod
+    def get_theme():
+        return ft.Theme(
+            color_scheme_seed=AppTheme.PRIMARY_COLOR,
+            visual_density=ft.ThemeVisualDensity.STANDARD
+        )
 class AppStyles:
     class Text:
         BODY = {

@@ -1,20 +1,24 @@
+[build-system]
+requires = ["flet"]
+
 [project]
 name = "facret"
-version = "0.1.0"
-description = "invoices and taxwidhtholdings processor"
-authors = [
-    {name = "carlos sigua",email = "carlos.sigua@gmail.com"}
-]
-license = {text = "MIT"}
-readme = "README.md"
-requires-python = ">=3.11"
-dependencies = ["flet (>=0.28.3,<0.29.0)", "flet-desktop (>=0.28.3,<0.29.0)", "pdf2image (>=1.17.0,<2.0.0)"]
-
-packages = [
-    { include = "facret", from = "src" }
+version = "1.0.0"
+description = "Sistema de Facturación Electrónica"
+authors = [{name = "Tu Nombre", email = "tu@email.com"}]
+dependencies = [
+    "flet>=0.24.0",
+    "lxml>=4.9.3",
+    "openpyxl>=3.1.2",
+    "python-dateutil>=2.8.2",
+    "reportlab>=4.0.4",
+    "Pillow>=10.0.0"
 ]
 
+[tool.flet]
+name = "FACRET"
+description = "Sistema de Facturación Electrónica"
+icon = "src/assets/icons/app_icon.ico"
 
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.flet.android]
+package = "com.facret.app"
