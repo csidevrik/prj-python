@@ -1,0 +1,10 @@
+{
+  "app_title": "Helper Tools",
+  "window_width": 1200,
+  "window_height": 800,
+  "theme": "auto",
+  "sidebar_width": 280,
+  "sidebar_collapsed_width": 60,
+  "sidebar_visible": true,
+  "last_selected_tool": "settings"
+}

@@ -40,7 +40,7 @@ class DriveTheme:
     def get_button_style():
         return {
             "style": ft.ButtonStyle(
-                shape=ft.RoundedRectangleBorder(radius=8),
+                shape=ft.RoundedRectangleBorder(radius=10),
                 padding=ft.padding.symmetric(horizontal=16, vertical=8),
             )
         }

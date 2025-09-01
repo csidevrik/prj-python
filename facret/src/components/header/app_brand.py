@@ -5,7 +5,7 @@ import flet as ft
 from config.drive_theme import DriveTheme
 
 class AppBrandComponent:
-    def __init__(self, app_name: str = "Facret Drive", icon: str = ft.Icons.FOLDER_SPECIAL, compact_mode: bool = False):
+    def __init__(self, app_name: str = "FACRET", icon: str = ft.Icons.FOLDER_SPECIAL, compact_mode: bool = False):
         self.app_name = app_name
         self.icon = icon
         self.compact_mode = compact_mode
