@@ -1,5 +1,6 @@
 class AppSettings:
     # Configuración de ventana
+    ICON = "../src/assets/favicon.ico"
     APP_TITLE = "FACRET - Facturación Electrónica"
     WINDOW_WIDTH          = 1200
     WINDOW_HEIGHT         = 800

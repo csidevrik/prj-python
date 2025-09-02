@@ -12,6 +12,7 @@ def main(page: ft.Page):
         page.window.height      = settings.WINDOW_HEIGHT
         page.window.min_width   = settings.WINDOW_MIN_WIDTH
         page.window.min_height  = settings.WINDOW_MIN_HEIGHT
+        page.window.icon        = settings.ICON
         page.theme_mode         = ft.ThemeMode.LIGHT
         page.padding            = 0
         page.spacing            = 0
