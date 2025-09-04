@@ -7,19 +7,19 @@ from ...config.settings import AppSettings
 
 class MainLayout:
     def __init__(self, page: ft.Page):
-        self.page = page
-        self.settings = AppSettings()
-        self.navigation_handler = NavigationHandler(page)
-        
+        self.page                = page
+        self.settings            = AppSettings()
+        self.navigation_handler  = NavigationHandler(page)
+
         # Crear componentes
-        self.appbar = AppBar(page, self.navigation_handler)
-        self.sidebar = Sidebar(page, self.navigation_handler)
-        self.breadcrumb = Breadcrumb(page, self.navigation_handler)
-        
+        self.appbar              = AppBar(page, self.navigation_handler)
+        self.sidebar             = Sidebar(page, self.navigation_handler)
+        self.breadcrumb          = Breadcrumb(page, self.navigation_handler)
+
         # Estado responsive
-        self.is_mobile = False
-        self.is_tablet = False
-        
+        self.is_mobile           = True
+        self.is_tablet           = False
+
     def build(self):
         # Layout principal usando Row y Column
         main_content = ft.Column([
@@ -39,7 +39,7 @@ class MainLayout:
                     content=self.navigation_handler.get_current_view(),
                     expand=True,
                     padding=20,
-                    bgcolor="#F5F5F5"
+                    bgcolor="#54DBBA"
                 )
             ], expand=True, spacing=0)
         ], spacing=0, expand=True)
