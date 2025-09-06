@@ -90,13 +90,24 @@ class Sidebar:
     
     def _navigate_to(self, view_name):
         self.navigation_handler.navigate_to(view_name)
-        self._update_active_state()
+        self.update_active_state()
     
-    def _update_active_state(self):
-        for menu_item in self.menu_items:
-            item_data = menu_item.data
-            is_active = self.navigation_handler.current_view == item_data["view"]
-            menu_item.bgcolor = AppTheme.SIDEBAR_ACTIVE_COLOR if is_active else "transparent"
+    def update_active_state(self):
+        print(f"Actualizando estado activo en sidebar: {self.navigation_handler.current_view}")
+
+        self._create_menu_items()
+
+        menu_column = self.sidebar_container.content.controls[1]  # Segundo control es la columna de menús
+        menu_column.controls = self.menu_items
+
+        #Actualizar breadcrumb tambien
+        if hasattr(self, 'page'):
+            self.page.update()
+            
+        # for menu_item in self.menu_items:
+        #     item_data = menu_item.data
+        #     is_active = self.navigation_handler.current_view == item_data["view"]
+        #     menu_item.bgcolor = AppTheme.SIDEBAR_ACTIVE_COLOR if is_active else "transparent"
         
         self.page.update()
     

@@ -15,12 +15,21 @@ class MainLayout:
         self.appbar              = AppBar(page, self.navigation_handler)
         self.sidebar             = Sidebar(page, self.navigation_handler)
         self.breadcrumb          = Breadcrumb(page, self.navigation_handler)
+        self.navigation_handler.set_sidebar_reference(self.sidebar)
 
         # Estado responsive
         self.is_mobile           = True
         self.is_tablet           = False
 
     def build(self):
+        self.main_content_container = ft.Container(
+            content=self.navigation_handler.get_current_view(),
+            expand=True,
+            padding=20,
+            bgcolor="#F5f5f5",
+        )
+
+        self.navigation_handler.set_main_content_container(self.main_content_container)
         # Layout principal usando Row y Column
         main_content = ft.Column([
             # AppBar
@@ -35,12 +44,13 @@ class MainLayout:
                 self.sidebar.build(),
                 
                 # Main content area
-                ft.Container(
-                    content=self.navigation_handler.get_current_view(),
-                    expand=True,
-                    padding=20,
-                    bgcolor="#54DBBA"
-                )
+                # ft.Container(
+                #     content=self.navigation_handler.get_current_view(),
+                #     expand=True,
+                #     padding=20,
+                #     bgcolor="#54DBBA"
+                # )
+                self.main_content_container
             ], expand=True, spacing=0)
         ], spacing=0, expand=True)
         
@@ -52,6 +62,6 @@ class MainLayout:
         self.is_tablet = width < self.settings.TABLET_BREAKPOINT and not self.is_mobile
         
         # Actualizar componentes responsive
-        self.appbar.update_responsive(self.is_mobile, self.is_tablet)
-        self.sidebar.update_responsive(self.is_mobile, self.is_tablet)
-        self.breadcrumb.update_responsive(self.is_mobile, self.is_tablet)
+        self.appbar.update_responsive(      self.is_mobile, self.is_tablet)
+        self.sidebar.update_responsive(     self.is_mobile, self.is_tablet)
+        self.breadcrumb.update_responsive(  self.is_mobile, self.is_tablet)

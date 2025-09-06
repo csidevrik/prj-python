@@ -26,7 +26,7 @@ def main(page: ft.Page):
         print("✅ FACRET iniciado correctamente")
         
     except Exception as e:
-        print(f"❌ Error al iniciar FACRET: {e}")
+        
         # Crear vista de error simple
         error_view = ft.Container(
             content=ft.Column([
@@ -41,9 +41,9 @@ def main(page: ft.Page):
             expand=True
         )
         page.add(error_view)
+        
+        print(f"❌ Error al iniciar FACRET: {e}")
 
 if __name__ == "__main__":
     print("🚀 Iniciando FACRET...")
     ft.app(target=main, view=ft.AppView.FLET_APP)
-# if __name__ == "__main__":
-#     ft.app(target=main, view=ft.AppView.FLET_APP)
