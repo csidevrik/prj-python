@@ -56,8 +56,13 @@ class Breadcrumb:
     
     def update_breadcrumb(self):
         """Actualizar breadcrumb cuando cambie la navegación"""
-        self.breadcrumb_container.content.controls = self._build_breadcrumb_items()
-        self.page.update()
+        # Ensure breadcrumb_container and its content are initialized
+        if not hasattr(self, 'breadcrumb_container') or self.breadcrumb_container is None:
+            self.build()
+        if self.breadcrumb_container.content and hasattr(self.breadcrumb_container.content, 'controls'):
+            self.breadcrumb_container.content.controls.clear()
+            self.breadcrumb_container.content.controls.extend(self._build_breadcrumb_items())
+            self.page.update()
     
     def update_responsive(self, is_mobile, is_tablet):
         if is_mobile:
