@@ -38,7 +38,7 @@ class GradientLibrary:
                 for grad in data:
                     self.gradients[grad["name"]] = grad["colors"]
 
-    def get_gradient(self, name, begin=ft.alignment.top_left, end=ft.alignment.bottom_right, rotation=None):
+    def get_gradient(self, name, begin=ft.Alignment(-1,-1), end=ft.Alignment(1,1), rotation=None):
         colors = self.gradients.get(name)
         if not colors:
             raise ValueError(f"Gradient '{name}' not found.")
@@ -80,13 +80,13 @@ class AppGradients:
     @staticmethod
     def content_area():
         return ft.LinearGradient(
-            begin=ft.alignment.top_left,
-            end=ft.alignment.bottom_right,
+            begin=ft.Alignment(-1,-1),
+            end=ft.Alignment(1,1),
             colors=[AppColors.BACKGROUND, AppColors.SURFACE]
         )
     
     @staticmethod
-    def by_name(name, begin=ft.alignment.top_left, end=ft.alignment.bottom_right, rotation=None):
+    def by_name(name, begin=ft.Alignment(1,-1), end=ft.Alignment(1,1), rotation=None):
         # Utiliza la instancia de GradientLibrary para obtener un gradiente por nombre
         return AppGradients.gradient_library.get_gradient(name, begin, end, rotation)
 

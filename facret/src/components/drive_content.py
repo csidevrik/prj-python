@@ -94,7 +94,7 @@ class DriveContentComponent:
                     size=48,
                     color=self._get_file_color(file_data["type"])
                 ),
-                alignment=ft.alignment.center,
+                alignment=ft.Alignment(0,0),
                 height=80,
             ),
             ft.Text(
@@ -112,7 +112,7 @@ class DriveContentComponent:
             column_items.append(
                 ft.Container(
                     content=ft.Icon(ft.Icons.PEOPLE, size=16, color=DriveTheme.GREY_600),
-                    alignment=ft.alignment.center_right,
+                    alignment=ft.Alignment(1,0),  # Alineado a la derecha
                 )
             )
         
