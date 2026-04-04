@@ -2,16 +2,21 @@
 # components/drive_sidebar.py
 # =============================
 import flet as ft
+from typing import Callable, Optional
 from config.drive_theme import DriveTheme
 
 class DriveSidebarComponent:
     def __init__(self, page: ft.Page):
         self.page = page
         self.selected_item = "home"
+        self._expanded = True
+        self._sidebar_width = 280
+        self.on_nav_change: Optional[Callable[[str], None]] = None
     
     def build(self):
-        return ft.Container(
-            width=280,
+        self._container  = ft.Container(
+            width=self._sidebar_width,
+            clip_behavior=ft.ClipBehavior.HARD_EDGE,
             content=ft.Column([
                 # Botón Nuevo
                 ft.Container(
@@ -72,6 +77,7 @@ class DriveSidebarComponent:
             ], spacing=0),
             bgcolor=DriveTheme.SURFACE_WHITE,
         )
+        return self._container
     
     def _create_nav_item(self, key: str, icon: str, text: str, selected: bool = False):
         is_selected = self.selected_item == key
@@ -98,8 +104,16 @@ class DriveSidebarComponent:
     
     def _on_nav_click(self, key: str):
         self.selected_item = key
+        if self.on_nav_change:
+            self.on_nav_change(key)
         self.page.update()
     
     def _on_new_click(self, e):
         # Implementar menú de nuevo archivo/carpeta
+        pass
+
+    def _toggle_sidebar(self, e):
+        self._expanded = not self._expanded
+        self._container.width = self._sidebar_width if self._expanded else 0
+        self._container.update()
         pass

@@ -2,8 +2,8 @@
 # drive_gui.py
 # =============================
 import flet as ft
-from components.drive_header                import DriveHeaderComponent
 from components.drive_sidebar               import DriveSidebarComponent
+from components.drive_toolbar               import DriveToolbarComponent
 from components.drive_content               import DriveContentComponent
 from components.sync_status                 import SyncStatusComponent
 from components.header.responsive_header    import ResponsiveDriveHeader as ResponsiveHeaderComponent
@@ -26,14 +26,19 @@ def run_drive_gui():
         # header      = DriveHeaderComponent(page)
         header      = ResponsiveHeaderComponent(page)
         sidebar     = DriveSidebarComponent(page)
+        toolbar     = DriveToolbarComponent(page, on_toggle_sidebar=sidebar._toggle_sidebar)
+        sidebar.on_nav_change = toolbar.update_breadcrumb
         content     = DriveContentComponent(page)
         sync_status = SyncStatusComponent(page)
-        
+
         # Layout principal
         main_layout = ft.Column([
             # Header con búsqueda
             header.build(),
-            
+
+            # Barra de navegación secundaria
+            toolbar.build(),
+
             # Contenido principal
             ft.Row([
                 # Sidebar izquierdo
