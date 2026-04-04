@@ -1,19 +1,17 @@
-[project]
+[tool.poetry]
 name = "facret"
 version = "0.1.0"
 description = "invoices and taxwidhtholdings processor"
-authors = [
-    {name = "carlos sigua",email = "carlos.sigua@gmail.com"}
-]
-license = {text = "MIT"}
+authors = ["carlos sigua <carlos.sigua@gmail.com>"]
+license = "MIT"
 readme = "README.md"
-requires-python = ">=3.11"
-dependencies = ["flet (>=0.28.3,<0.29.0)", "flet-desktop (>=0.28.3,<0.29.0)", "pdf2image (>=1.17.0,<2.0.0)"]
+package-mode = false
 
-packages = [
-    { include = "facret", from = "src" }
-]
-
+[tool.poetry.dependencies]
+python = ">=3.11"
+flet = ">=0.28.3,<0.29.0"
+flet-desktop = ">=0.28.3,<0.29.0"
+pdf2image = ">=1.17.0,<2.0.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
