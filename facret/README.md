@@ -67,7 +67,8 @@ facret/
 │   │   │   ├── search_component.py    # Búsqueda con filtros
 │   │   │   ├── tools_component.py     # Botones de acción
 │   │   │   └── user_session.py        # Sesión y perfil de usuario
-│   │   ├── drive_sidebar.py    # Menú lateral de navegación
+│   │   ├── drive_toolbar.py    # Barra secundaria: hamburguesa + breadcrumb de navegación
+│   │   ├── drive_sidebar.py    # Menú lateral de navegación (colapsable vía toolbar)
 │   │   ├── drive_content.py    # Área principal de contenido
 │   │   └── sync_status.py      # Barra de estado inferior
 │   │
@@ -117,7 +118,8 @@ drive_gui.py  (orquestador)
     ├── config/drive_theme.py          ← tema global
     ├── components/header/
     │   └── responsive_header.py       ← header con 4 subcomponentes
-    ├── components/drive_sidebar.py    ← navegación lateral
+    ├── components/drive_toolbar.py    ← barra secundaria: hamburguesa + breadcrumb
+    ├── components/drive_sidebar.py    ← navegación lateral (colapsable)
     ├── components/drive_content.py    ← contenido + servicios core
     └── components/sync_status.py      ← estado del sistema
 ```
@@ -136,7 +138,9 @@ Para más detalle ver:
 
 - Interfaz de explorador de archivos completamente funcional con diseño responsivo.
 - Header modular dividido en 4 subcomponentes independientes (brand, search, tools, session).
-- Sidebar de navegación con estructura jerárquica.
+- Barra secundaria (`drive_toolbar.py`) con botón hamburguesa y breadcrumb de navegación.
+- Sidebar colapsable: el botón hamburguesa en la toolbar alterna el sidebar entre ancho completo (280px) y oculto (0px) sin perder el botón de control.
+- Breadcrumb reactivo: al navegar entre secciones del sidebar, la toolbar actualiza automáticamente el nombre de la sección activa.
 - Área de contenido con listado, previsualización y operaciones sobre archivos.
 - Barra de estado con soporte para notificaciones y progreso.
 - Tema centralizado (`drive_theme.py`) que controla toda la paleta visual.

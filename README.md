@@ -32,9 +32,12 @@ Es una app de escritorio construida con **Flet** (Python + Flutter).
 ┌─────────────────────────────────────────┐
 │  Header (responsive_header.py)          │
 │  [Logo] [Búsqueda] [Tools] [Usuario]    │
+├─────────────────────────────────────────┤
+│  Toolbar (drive_toolbar.py)             │
+│  [≡]  >  Página principal              │
 ├──────────┬──────────────────────────────┤
 │ Sidebar  │  sync_status.py (barra top)  │
-│          ├──────────────────────────────┤
+│ (toggle) ├──────────────────────────────┤
 │          │  drive_content.py            │
 │          │  (contenido principal)       │
 └──────────┴──────────────────────────────┘
