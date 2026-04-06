@@ -17,13 +17,13 @@ Herramienta de escritorio desarrollada en Python con [Flet](https://flet.dev/), 
 
 ## Stack tecnológico
 
-| Componente | Tecnología |
-|---|---|
-| Lenguaje | Python >= 3.11 |
-| UI Framework | [Flet](https://flet.dev/) 0.28.3 |
-| Renderizado PDF | pdf2image + Poppler 24.08.0 |
-| Automatización Outlook | pywin32 (win32com) |
-| Gestión de proyecto | [Poetry](https://python-poetry.org/) |
+| Componente              | Tecnología                       |
+| ----------------------- | --------------------------------- |
+| Lenguaje                | Python >= 3.11                    |
+| UI Framework            | [Flet](https://flet.dev/) 0.28.3     |
+| Renderizado PDF         | pdf2image + Poppler 24.08.0       |
+| Automatización Outlook | pywin32 (win32com)                |
+| Gestión de proyecto    | [Poetry](https://python-poetry.org/) |
 
 ---
 
@@ -126,6 +126,35 @@ main_drive.py
 - Tema centralizado (`drive_theme.py`) que controla toda la paleta visual.
 
 ---
+
+
+
+Mapeo del código monolítico → estructura del proyecto
+El archivo que me pasaste tiene funciones que encajan así:
+
+![1775458934441](image/README/1775458934441.png)
+Pasos para migrar
+Paso 1 — models/models.py (lo más simple, sin dependencias)
+
+Mover Registro y RegistroRet
+Paso 2 — logic/xml_cleaner.py (solo usa stdlib: os, re)
+
+Mover las funciones de limpieza de XML (clean_xml_files y sus helpers)
+Paso 3 — logic/xml_processor.py (depende de models + xml_cleaner)
+
+Mover extract_xml_data, extract_xml_content, get_register_xml_retencion, process_all_xml_files, process_all_xml_rets
+Paso 4 — logic/file_utils.py (solo usa stdlib)
+
+Mover remove_duplicate_files, remove_prefix_files_pdf, rename_files_with_attributes
+Paso 5 — logic/data_exporter.py (depende de xml_processor)
+
+Mover json_to_csv, update_json_with_xml_data
+Paso 6 — logic/browser_utils.py (solo usa stdlib)
+
+Mover open_pdf_with_*, get_browser_command
+Paso 7 — conectar al menú en components/
+
+Crear components/file_tools_menu.py con el PopupMenuButton que llama a la lógica nueva
 
 ## Licencia
 
