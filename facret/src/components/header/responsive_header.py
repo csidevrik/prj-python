@@ -219,7 +219,8 @@ class ResponsiveDriveHeader:
         print("Ayuda clickeada")
     
     def _handle_settings_click(self, e):
-        print("Configuración clickeada")
+        if self.on_navigate:
+            self.on_navigate("settings")
     
     def _handle_notifications_click(self, e):
         print("Notificaciones clickeadas")

@@ -77,7 +77,8 @@ def run_drive_gui():
                 content_area.content = _placeholder_page(key)
             content_area.update()
 
-        sidebar.on_nav_change = on_navigate
+        sidebar.on_nav_change   = on_navigate
+        header.on_navigate      = on_navigate   # engranaje del header → settings
 
         main_layout = ft.Column(
             [
