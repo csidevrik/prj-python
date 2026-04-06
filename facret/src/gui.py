@@ -1,17 +1,51 @@
 # =============================
 # gui.py
 # =============================
+import importlib
 import flet as ft
 from components.sidebar                      import DriveSidebarComponent
 from components.toolbar                      import DriveToolbarComponent
 from components.content                      import DriveContentComponent
 from components.header.responsive_header     import ResponsiveDriveHeader as ResponsiveHeaderComponent
 from config.theme                            import DriveTheme
+from config.menu_config                      import ALL_ITEMS, MENU_ITEMS, LABEL_MAP
 
-# Mapa de keys del sidebar a componentes
-_CONTENT_MAP = {
-    "my_drive": "facs_downloader_panel.FacsDownloaderPanel",
-}
+
+def _load_page(page_class_path: str, flet_page: ft.Page) -> ft.Control:
+    """
+    Importa dinámicamente 'module.path.ClassName' y devuelve .build().
+    Para registrar una nueva página solo hay que actualizar menu_config.py.
+    """
+    module_path, class_name = page_class_path.rsplit(".", 1)
+    module = importlib.import_module(module_path)
+    cls = getattr(module, class_name)
+    return cls(flet_page).build()
+
+
+def _placeholder_page(key: str) -> ft.Control:
+    """Vista por defecto para secciones aún no implementadas."""
+    label = LABEL_MAP.get(key, key)
+    return ft.Container(
+        content=ft.Column(
+            [
+                ft.Icon(ft.Icons.CONSTRUCTION, size=64, color=DriveTheme.GREY_200),
+                ft.Text(
+                    f"«{label}»",
+                    size=18,
+                    weight=ft.FontWeight.W_500,
+                    color=DriveTheme.GREY_600,
+                ),
+                ft.Text("Sección en construcción", size=13, color=DriveTheme.GREY_600),
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=12,
+        ),
+        expand=True,
+        alignment=ft.alignment.center,
+        bgcolor=DriveTheme.GREY_50,
+    )
+
 
 def run_drive_gui():
     def main(page: ft.Page):
@@ -28,7 +62,6 @@ def run_drive_gui():
         sidebar = DriveSidebarComponent(page)
         toolbar = DriveToolbarComponent(page, on_toggle_sidebar=sidebar._toggle_sidebar)
 
-        # Área de contenido reactiva
         content_area = ft.Container(
             content=DriveContentComponent(page).build(),
             expand=True,
@@ -37,23 +70,28 @@ def run_drive_gui():
 
         def on_navigate(key: str):
             toolbar.update_breadcrumb(key)
-            if key == "my_drive":
-                from components.facs_downloader_panel import FacsDownloaderPanel
-                content_area.content = FacsDownloaderPanel(page).build()
+            item = next((m for m in ALL_ITEMS if m.key == key), None)
+            if item and item.page_class:
+                content_area.content = _load_page(item.page_class, page)
             else:
-                content_area.content = DriveContentComponent(page).build()
+                content_area.content = _placeholder_page(key)
             content_area.update()
 
         sidebar.on_nav_change = on_navigate
 
-        main_layout = ft.Column([
-            header.build(),
-            toolbar.build(),
-            ft.Row([
-                sidebar.build(),
-                content_area,
-            ], spacing=0, expand=True),
-        ], spacing=0, expand=True)
+        main_layout = ft.Column(
+            [
+                header.build(),
+                toolbar.build(),
+                ft.Row(
+                    [sidebar.build(), content_area],
+                    spacing=0,
+                    expand=True,
+                ),
+            ],
+            spacing=0,
+            expand=True,
+        )
 
         page.add(main_layout)
 

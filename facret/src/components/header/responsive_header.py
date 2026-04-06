@@ -14,6 +14,8 @@ class ResponsiveDriveHeader:
         self.mobile_breakpoint = 768
         self.is_mobile = self._check_if_mobile()
         self.drawer_open = False
+        # Callback de navegación — se asigna desde gui.py después de construir el layout
+        self.on_navigate = None
         
         # Configurar herramientas con prioridades móviles
         self.tools_config = [
