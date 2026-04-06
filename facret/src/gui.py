@@ -73,6 +73,7 @@ def run_drive_gui():
         def rebuild():
             """Reconstruye todos los componentes con los colores actuales de AppTheme.
             Se llama al iniciar y cada vez que el usuario cambia el tema."""
+            page.overlay.clear()   # limpia FilePickers de páginas dinámicas
             header  = ResponsiveHeaderComponent(page)
             sidebar = DriveSidebarComponent(page)
             toolbar = DriveToolbarComponent(page, on_toggle_sidebar=sidebar._toggle_sidebar)
@@ -109,8 +110,11 @@ def run_drive_gui():
             page.controls.append(main_layout)
             page.update()
 
-        # Exponer rebuild al settings panel vía page.data
-        page.data = {"on_theme_change": rebuild}
+        # Exponer callbacks a las páginas vía page.data
+        page.data = {
+            "on_theme_change": rebuild,
+            "on_navigate":     on_navigate,
+        }
 
         rebuild()
 
