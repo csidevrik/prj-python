@@ -5,7 +5,6 @@ import importlib
 import flet as ft
 from components.sidebar                      import DriveSidebarComponent
 from components.toolbar                      import DriveToolbarComponent
-from components.content                      import DriveContentComponent
 from components.header.responsive_header     import ResponsiveDriveHeader as ResponsiveHeaderComponent
 from config.theme                            import DriveTheme
 from config.menu_config                      import ALL_ITEMS, MENU_ITEMS, LABEL_MAP
@@ -63,7 +62,7 @@ def run_drive_gui():
         toolbar = DriveToolbarComponent(page, on_toggle_sidebar=sidebar._toggle_sidebar)
 
         content_area = ft.Container(
-            content=DriveContentComponent(page).build(),
+            content=_load_page("pages.home_page.HomePage", page),
             expand=True,
             bgcolor=ft.Colors.GREY_50,
         )

@@ -1,5 +1,5 @@
 # =============================
-# components/facs_downloader_panel.py
+# pages/facs_downloader_page.py
 # =============================
 import flet as ft
 import json
@@ -10,14 +10,14 @@ from config.theme import DriveTheme
 _CONFIG_PATH = Path(__file__).parent.parent / "config" / "facs_config.json"
 
 _DEFAULT_CONFIG = {
-    "carpeta_outlook":    "Inbox\\CONTRACT\\ETAPA\\FACS",
-    "correo_remitente":   "info@comunicados-etapa.com",
+    "carpeta_outlook":     "Inbox\\CONTRACT\\ETAPA\\FACS",
+    "correo_remitente":    "info@comunicados-etapa.com",
     "correo_destinatario": "csigua@emov.gob.ec",
-    "carpeta_guardar":    "D:\\Facturas_ETAPA",
+    "carpeta_guardar":     "D:\\Facturas_ETAPA",
 }
 
 
-class FacsDownloaderPanel:
+class FacsDownloaderPage:
     def __init__(self, page: ft.Page):
         self.page = page
         self._config = self._load_config()
@@ -65,12 +65,7 @@ class FacsDownloaderPanel:
         self._run_btn = ft.ElevatedButton(
             content=ft.Row([
                 ft.Icon(ft.Icons.DOWNLOAD_ROUNDED, size=18, color=ft.Colors.WHITE),
-                ft.Text(
-                    "Ejecutar descarga",
-                    size=13,
-                    color=ft.Colors.WHITE,
-                    weight=ft.FontWeight.W_500,
-                ),
+                ft.Text("Ejecutar descarga", size=13, color=ft.Colors.WHITE, weight=ft.FontWeight.W_500),
             ], spacing=8, tight=True),
             style=ft.ButtonStyle(
                 bgcolor=DriveTheme.PRIMARY_BLUE,
@@ -104,22 +99,13 @@ class FacsDownloaderPanel:
         return ft.Container(
             content=ft.Row([
                 ft.Container(
-                    content=ft.Icon(
-                        ft.Icons.DOWNLOAD_ROUNDED,
-                        size=24,
-                        color=DriveTheme.PRIMARY_BLUE,
-                    ),
+                    content=ft.Icon(ft.Icons.DOWNLOAD_ROUNDED, size=24, color=DriveTheme.PRIMARY_BLUE),
                     bgcolor=ft.Colors.with_opacity(0.1, DriveTheme.PRIMARY_BLUE),
                     border_radius=10,
                     padding=10,
                 ),
                 ft.Column([
-                    ft.Text(
-                        "Download FACS",
-                        size=18,
-                        weight=ft.FontWeight.W_600,
-                        color=DriveTheme.GREY_800,
-                    ),
+                    ft.Text("Download FACS", size=18, weight=ft.FontWeight.W_600, color=DriveTheme.GREY_800),
                     ft.Text(
                         "Descarga facturas ETAPA desde Outlook local · sin cuenta Microsoft paga",
                         size=12,
@@ -134,37 +120,12 @@ class FacsDownloaderPanel:
     def _build_form(self):
         return ft.Container(
             content=ft.Column([
-                ft.Text(
-                    "Configuración de la acción",
-                    size=13,
-                    weight=ft.FontWeight.W_600,
-                    color=DriveTheme.GREY_800,
-                ),
+                ft.Text("Configuracion de la accion", size=13, weight=ft.FontWeight.W_600, color=DriveTheme.GREY_800),
                 ft.Container(height=12),
-                self._build_field(
-                    label="Carpeta de Outlook",
-                    hint="Ej: Inbox\\CONTRACT\\ETAPA\\FACS",
-                    icon=ft.Icons.FOLDER_OUTLINED,
-                    field=self._tf_outlook,
-                ),
-                self._build_field(
-                    label="Correo del remitente (From contains)",
-                    hint="Ej: info@comunicados-etapa.com",
-                    icon=ft.Icons.ALTERNATE_EMAIL,
-                    field=self._tf_remitente,
-                ),
-                self._build_field(
-                    label="Correo del destinatario (To contains)",
-                    hint="Ej: csigua@emov.gob.ec",
-                    icon=ft.Icons.PERSON_OUTLINE,
-                    field=self._tf_destinatario,
-                ),
-                self._build_field(
-                    label="Carpeta de descarga local",
-                    hint="Ej: D:\\Facturas_ETAPA",
-                    icon=ft.Icons.SAVE_ALT,
-                    field=self._tf_guardar,
-                ),
+                self._build_field("Carpeta de Outlook",              "Ej: Inbox\\CONTRACT\\ETAPA\\FACS", ft.Icons.FOLDER_OUTLINED,  self._tf_outlook),
+                self._build_field("Correo del remitente (From)",     "Ej: info@comunicados-etapa.com",   ft.Icons.ALTERNATE_EMAIL,   self._tf_remitente),
+                self._build_field("Correo del destinatario (To)",    "Ej: csigua@emov.gob.ec",           ft.Icons.PERSON_OUTLINE,    self._tf_destinatario),
+                self._build_field("Carpeta de descarga local",       "Ej: D:\\Facturas_ETAPA",            ft.Icons.SAVE_ALT,          self._tf_guardar),
             ], spacing=0),
             **DriveTheme.get_card_style(),
             padding=20,
@@ -174,17 +135,9 @@ class FacsDownloaderPanel:
         field.hint_text = hint
         return ft.Container(
             content=ft.Row([
-                ft.Container(
-                    content=ft.Icon(icon, size=18, color=DriveTheme.GREY_600),
-                    width=36,
-                ),
+                ft.Container(content=ft.Icon(icon, size=18, color=DriveTheme.GREY_600), width=36),
                 ft.Column([
-                    ft.Text(
-                        label,
-                        size=11,
-                        color=DriveTheme.GREY_600,
-                        weight=ft.FontWeight.W_500,
-                    ),
+                    ft.Text(label, size=11, color=DriveTheme.GREY_600, weight=ft.FontWeight.W_500),
                     field,
                 ], spacing=2, expand=True),
             ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.START),
@@ -196,11 +149,7 @@ class FacsDownloaderPanel:
             ft.OutlinedButton(
                 content=ft.Row([
                     ft.Icon(ft.Icons.SAVE_OUTLINED, size=16, color=DriveTheme.PRIMARY_BLUE),
-                    ft.Text(
-                        "Guardar configuración",
-                        size=13,
-                        color=DriveTheme.PRIMARY_BLUE,
-                    ),
+                    ft.Text("Guardar configuracion", size=13, color=DriveTheme.PRIMARY_BLUE),
                 ], spacing=8, tight=True),
                 style=ft.ButtonStyle(
                     shape=ft.RoundedRectangleBorder(radius=8),
@@ -217,12 +166,7 @@ class FacsDownloaderPanel:
             content=ft.Column([
                 ft.Row([
                     ft.Icon(ft.Icons.TERMINAL, size=16, color=DriveTheme.GREY_600),
-                    ft.Text(
-                        "Registro de actividad",
-                        size=13,
-                        weight=ft.FontWeight.W_600,
-                        color=DriveTheme.GREY_800,
-                    ),
+                    ft.Text("Registro de actividad", size=13, weight=ft.FontWeight.W_600, color=DriveTheme.GREY_800),
                     ft.Container(expand=True),
                     ft.IconButton(
                         icon=ft.Icons.DELETE_OUTLINE,
@@ -233,11 +177,7 @@ class FacsDownloaderPanel:
                     ),
                 ], spacing=8),
                 ft.Divider(height=1, color=DriveTheme.GREY_200),
-                ft.Container(
-                    content=self._log_column,
-                    height=200,
-                    padding=ft.padding.all(8),
-                ),
+                ft.Container(content=self._log_column, height=200, padding=ft.padding.all(8)),
             ], spacing=8),
             **DriveTheme.get_card_style(),
             padding=16,
@@ -256,15 +196,15 @@ class FacsDownloaderPanel:
 
     def _save_config(self, e):
         data = {
-            "carpeta_outlook":    self._tf_outlook.value,
-            "correo_remitente":   self._tf_remitente.value,
+            "carpeta_outlook":     self._tf_outlook.value,
+            "correo_remitente":    self._tf_remitente.value,
             "correo_destinatario": self._tf_destinatario.value,
-            "carpeta_guardar":    self._tf_guardar.value,
+            "carpeta_guardar":     self._tf_guardar.value,
         }
         _CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         with open(_CONFIG_PATH, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-        self._log("✅ Configuración guardada correctamente.")
+        self._log("Configuracion guardada correctamente.")
 
     def _run_download(self, e):
         self._run_btn.disabled = True
@@ -283,7 +223,7 @@ class FacsDownloaderPanel:
                 correo_remitente=self._tf_remitente.value,
             )
         except Exception as ex:
-            self._log(f"❌ Error: {ex}")
+            self._log(f"Error: {ex}")
         finally:
             pythoncom.CoUninitialize()
             self._run_btn.disabled = False
