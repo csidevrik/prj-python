@@ -41,7 +41,7 @@ class DriveSidebarComponent:
                 # Menú de navegación
                 ft.Column([
                     self._create_nav_item("home", ft.Icons.HOME_OUTLINED, "Página principal", True),
-                    self._create_nav_item("my_drive", ft.Icons.FOLDER_OUTLINED, "Mi unidad"),
+                    self._create_nav_item("my_drive", ft.Icons.DOWNLOAD_ROUNDED, "Download FACS"),
                     self._create_nav_item("computers", ft.Icons.COMPUTER_OUTLINED, "Ordenadores"),
                     self._create_nav_item("shared", ft.Icons.PEOPLE_OUTLINED, "Compartido conmigo"),
                     self._create_nav_item("recent", ft.Icons.ACCESS_TIME, "Reciente"),

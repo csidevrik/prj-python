@@ -48,7 +48,7 @@ def run_drive_gui():
                 ft.Container(
                     content=ft.Column([
                         # Estado de sincronización
-                        sync_status.build(),
+                        # sync_status.build(),
                         # Contenido principal
                         content.build(),
                     ], spacing=0),
