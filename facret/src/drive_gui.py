@@ -5,9 +5,13 @@ import flet as ft
 from components.drive_sidebar               import DriveSidebarComponent
 from components.drive_toolbar               import DriveToolbarComponent
 from components.drive_content               import DriveContentComponent
-from components.sync_status                 import SyncStatusComponent
 from components.header.responsive_header    import ResponsiveDriveHeader as ResponsiveHeaderComponent
 from config.drive_theme                     import DriveTheme
+
+# Mapa de keys del sidebar a componentes
+_CONTENT_MAP = {
+    "my_drive": "facs_downloader_panel.FacsDownloaderPanel",
+}
 
 def run_drive_gui():
     def main(page: ft.Page):
@@ -18,47 +22,39 @@ def run_drive_gui():
         page.padding = 0
         page.spacing = 0
         page.theme_mode = ft.ThemeMode.LIGHT
-        
-        # Aplicar tema personalizado
-        page.theme  = DriveTheme.get_theme()
-        
-        # Componentes principales
-        # header      = DriveHeaderComponent(page)
-        header      = ResponsiveHeaderComponent(page)
-        sidebar     = DriveSidebarComponent(page)
-        toolbar     = DriveToolbarComponent(page, on_toggle_sidebar=sidebar._toggle_sidebar)
-        sidebar.on_nav_change = toolbar.update_breadcrumb
-        content     = DriveContentComponent(page)
-        sync_status = SyncStatusComponent(page)
+        page.theme = DriveTheme.get_theme()
 
-        # Layout principal
+        header  = ResponsiveHeaderComponent(page)
+        sidebar = DriveSidebarComponent(page)
+        toolbar = DriveToolbarComponent(page, on_toggle_sidebar=sidebar._toggle_sidebar)
+
+        # Área de contenido reactiva
+        content_area = ft.Container(
+            content=DriveContentComponent(page).build(),
+            expand=True,
+            bgcolor=ft.Colors.GREY_50,
+        )
+
+        def on_navigate(key: str):
+            toolbar.update_breadcrumb(key)
+            if key == "my_drive":
+                from components.facs_downloader_panel import FacsDownloaderPanel
+                content_area.content = FacsDownloaderPanel(page).build()
+            else:
+                content_area.content = DriveContentComponent(page).build()
+            content_area.update()
+
+        sidebar.on_nav_change = on_navigate
+
         main_layout = ft.Column([
-            # Header con búsqueda
             header.build(),
-
-            # Barra de navegación secundaria
             toolbar.build(),
-
-            # Contenido principal
             ft.Row([
-                # Sidebar izquierdo
                 sidebar.build(),
-                
-                # Área de contenido principal
-                ft.Container(
-                    content=ft.Column([
-                        # Estado de sincronización
-                        # sync_status.build(),
-                        # Contenido principal
-                        content.build(),
-                    ], spacing=0),
-                    expand=True,
-                    bgcolor=ft.Colors.GREY_50,
-                )
-            ], spacing=0, expand=True)
-            
+                content_area,
+            ], spacing=0, expand=True),
         ], spacing=0, expand=True)
-        
+
         page.add(main_layout)
 
     ft.app(target=main, assets_dir="assets")

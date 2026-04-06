@@ -6,7 +6,7 @@ from config.drive_theme import DriveTheme
 
 NAV_LABELS = {
     "home":      "Página principal",
-    "my_drive":  "Mi unidad",
+    "my_drive":  "Download FACS",
     "computers": "Ordenadores",
     "shared":    "Compartido conmigo",
     "recent":    "Reciente",
