@@ -57,42 +57,61 @@ def run_drive_gui():
         page.theme_mode = ft.ThemeMode.LIGHT
         page.theme = DriveTheme.get_theme()
 
-        header  = ResponsiveHeaderComponent(page)
-        sidebar = DriveSidebarComponent(page)
-        toolbar = DriveToolbarComponent(page, on_toggle_sidebar=sidebar._toggle_sidebar)
-
-        content_area = ft.Container(
-            content=_load_page("pages.home_page.HomePage", page),
-            expand=True,
-            bgcolor=ft.Colors.GREY_50,
-        )
+        # ctx guarda referencias mutables a los componentes activos.
+        # on_navigate cierra sobre ctx para siempre usar la instancia actual.
+        ctx: dict = {}
 
         def on_navigate(key: str):
-            toolbar.update_breadcrumb(key)
+            ctx["toolbar"].update_breadcrumb(key)
             item = next((m for m in ALL_ITEMS if m.key == key), None)
             if item and item.page_class:
-                content_area.content = _load_page(item.page_class, page)
+                ctx["content_area"].content = _load_page(item.page_class, page)
             else:
-                content_area.content = _placeholder_page(key)
-            content_area.update()
+                ctx["content_area"].content = _placeholder_page(key)
+            ctx["content_area"].update()
 
-        sidebar.on_nav_change   = on_navigate
-        header.on_navigate      = on_navigate   # engranaje del header → settings
+        def rebuild():
+            """Reconstruye todos los componentes con los colores actuales de AppTheme.
+            Se llama al iniciar y cada vez que el usuario cambia el tema."""
+            header  = ResponsiveHeaderComponent(page)
+            sidebar = DriveSidebarComponent(page)
+            toolbar = DriveToolbarComponent(page, on_toggle_sidebar=sidebar._toggle_sidebar)
 
-        main_layout = ft.Column(
-            [
-                header.build(),
-                toolbar.build(),
-                ft.Row(
-                    [sidebar.build(), content_area],
-                    spacing=0,
-                    expand=True,
-                ),
-            ],
-            spacing=0,
-            expand=True,
-        )
+            content_area = ft.Container(
+                content=_load_page("pages.home_page.HomePage", page),
+                expand=True,
+                bgcolor=ft.Colors.GREY_50,
+            )
 
-        page.add(main_layout)
+            ctx["header"]       = header
+            ctx["sidebar"]      = sidebar
+            ctx["toolbar"]      = toolbar
+            ctx["content_area"] = content_area
+
+            sidebar.on_nav_change = on_navigate
+            header.on_navigate    = on_navigate
+
+            main_layout = ft.Column(
+                [
+                    header.build(),
+                    toolbar.build(),
+                    ft.Row(
+                        [sidebar.build(), content_area],
+                        spacing=0,
+                        expand=True,
+                    ),
+                ],
+                spacing=0,
+                expand=True,
+            )
+
+            page.controls.clear()
+            page.controls.append(main_layout)
+            page.update()
+
+        # Exponer rebuild al settings panel vía page.data
+        page.data = {"on_theme_change": rebuild}
+
+        rebuild()
 
     ft.app(target=main, assets_dir="assets")

@@ -335,25 +335,17 @@ class SettingsPanel:
     # ── Apply theme ───────────────────────────────────────────────────────
 
     def _apply_theme(self, theme: dict):
-        """
-        Aplica el tema seleccionado:
-          1. Actualiza los atributos de clase en AppTheme.
-          2. Cambia page.theme para que Flet refresque su esquema de Material.
-          3. Recarga el panel para que los bordes activos se actualicen.
-        """
-        # Actualizar la clase AppTheme
-        T.SEED               = theme["seed"]
-        T.PRIMARY            = theme["primary"]
-        T.PRIMARY_CONTAINER  = theme["primary_container"]
-        T.ON_SURFACE         = theme["on_surface"]
-        # Mantener alias de compat sincronizados
-        T.PRIMARY_BLUE       = T.PRIMARY
+        # 1. Actualizar AppTheme (clase compartida por todos los componentes)
+        T.SEED              = theme["seed"]
+        T.PRIMARY           = theme["primary"]
+        T.PRIMARY_CONTAINER = theme["primary_container"]
+        T.ON_SURFACE        = theme["on_surface"]
+        T.PRIMARY_BLUE      = T.PRIMARY  # alias de compat
 
-        # Actualizar el tema de Flet
+        # 2. Actualizar el esquema Material de Flet
         self.page.theme = T.get_theme()
 
-        # Actualizar estado interno y refrescar las tarjetas
-        self._active_seed = theme["seed"]
-        self._status_text.value = f"✅ Tema «{theme['name']}» aplicado. Navega a otra sección para verlo completo."
-
-        self.page.update()
+        # 3. Reconstruir toda la UI con los nuevos colores
+        on_rebuild = (self.page.data or {}).get("on_theme_change")
+        if on_rebuild:
+            on_rebuild()

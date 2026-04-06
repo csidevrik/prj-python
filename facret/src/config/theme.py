@@ -19,39 +19,45 @@ import flet as ft
 
 class AppTheme:
     # ── Color semilla ──────────────────────────────────────────────────────
-    # Cambia este valor y regenera la paleta en m3.material.io/theme-builder
-    SEED = "#1a73e8"
+    # Paleta teal — evoca agua, va con la identidad de ETAPA (empresa agua Cuenca)
+    # Para cambiar: edita SEED y los valores PRIMARY/PRIMARY_CONTAINER
+    SEED = "#007a8c"
 
     # ── Primary ───────────────────────────────────────────────────────────
-    # Acciones principales: botones, íconos activos, links
-    PRIMARY           = "#1a73e8"
-    ON_PRIMARY        = "#ffffff"   # texto/ícono SOBRE el color PRIMARY
-    PRIMARY_CONTAINER = "#d3e3fd"   # fondo suave: hover, ítem seleccionado
+    # Acciones principales: botones, íconos activos, links, selección en sidebar
+    PRIMARY           = "#0b5f78"   # teal oscuro
+    ON_PRIMARY        = "#ffffff"   # texto/ícono SOBRE PRIMARY
+    PRIMARY_CONTAINER = "#b8dde6"   # teal suave — hover, ítem seleccionado en sidebar
+
+    # ── Secondary ─────────────────────────────────────────────────────────
+    # Acentos, badges, estado activo secundario
+    SECONDARY         = "#0097a7"   # teal medio
+    ON_SECONDARY      = "#ffffff"
+    SECONDARY_CONTAINER = "#ccedf1" # teal muy suave
 
     # ── Surface ───────────────────────────────────────────────────────────
     # Fondos de componentes (cards, sidebar, header)
     SURFACE           = "#ffffff"
-    SURFACE_VARIANT   = "#f8f9fa"   # fondo de la página / áreas secundarias
-    ON_SURFACE        = "#3c4043"   # texto principal sobre surface
-    ON_SURFACE_VARIANT = "#5f6368"  # texto secundario, placeholders, subtítulos
+    SURFACE_VARIANT   = "#f0f7f8"   # fondo de la página — blanco con tinte teal
+    ON_SURFACE        = "#1a2b2e"   # texto principal
+    ON_SURFACE_VARIANT = "#3d5a5e"  # texto secundario, placeholders, subtítulos
 
     # ── Outline ───────────────────────────────────────────────────────────
     # Bordes, separadores, dividers
-    OUTLINE           = "#e8eaed"
-    OUTLINE_VARIANT   = "#dadce0"
+    OUTLINE           = "#c2d8db"   # borde teal suave
+    OUTLINE_VARIANT   = "#dce9eb"
 
     # ── Error / Success ───────────────────────────────────────────────────
-    ERROR             = "#d93025"
+    ERROR             = "#ba1a1a"
     ON_ERROR          = "#ffffff"
-    SUCCESS           = "#1e8e3e"   # logs positivos, confirmaciones
+    SUCCESS           = "#1a7a4a"   # verde confirmación (logs de descarga exitosa)
 
     # ── Backward compat ───────────────────────────────────────────────────
-    # Estos alias permiten que el código existente siga funcionando.
-    # En código NUEVO usa los nombres semánticos de arriba.
+    # Alias para código existente — en código NUEVO usa los nombres semánticos.
     PRIMARY_BLUE  = PRIMARY
     SURFACE_WHITE = SURFACE
     GREY_50       = SURFACE_VARIANT
-    GREY_100      = "#f1f3f4"
+    GREY_100      = "#e4eef0"
     GREY_200      = OUTLINE
     GREY_600      = ON_SURFACE_VARIANT
     GREY_800      = ON_SURFACE
@@ -61,7 +67,7 @@ class AppTheme:
     @staticmethod
     def get_theme() -> ft.Theme:
         return ft.Theme(
-            color_scheme_seed=AppTheme.SEED,
+            color_scheme_seed=AppTheme.SEED,  # "#007a8c" teal
             visual_density=ft.VisualDensity.COMPACT,
         )
 
