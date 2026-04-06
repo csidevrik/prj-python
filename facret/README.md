@@ -1,6 +1,6 @@
 # FACRET — Automatización y Revisión de XML Financieros
 
-Herramienta de escritorio desarrollada en Python con [Flet](https://flet.dev/), orientada a automatizar la revisión y procesamiento de archivos XML de facturas y retenciones para el área financiera de **EMVO EP**.
+Herramienta de escritorio desarrollada en Python con [Flet](https://flet.dev/), orientada a automatizar la revisión y procesamiento de archivos XML de facturas y retenciones para el área financiera de **EMOV EP**.
 
 ---
 
@@ -10,6 +10,7 @@ Herramienta de escritorio desarrollada en Python con [Flet](https://flet.dev/), 
 - Previsualiza archivos de texto y PDF (primera página como imagen).
 - Búsqueda avanzada con resaltado de coincidencias en contenido y nombre de archivo.
 - Procesa y valida XML de facturas y retenciones: extracción de datos, detección de duplicados y renombrado.
+- Descarga facturas ETAPA directamente desde Outlook local (sin cuenta Microsoft paga).
 - Interfaz moderna estilo explorador de archivos con header responsivo, sidebar de navegación y barra de estado.
 
 ---
@@ -19,8 +20,9 @@ Herramienta de escritorio desarrollada en Python con [Flet](https://flet.dev/), 
 | Componente | Tecnología |
 |---|---|
 | Lenguaje | Python >= 3.11 |
-| UI Framework | [Flet](https://flet.dev/) 0.28.x |
+| UI Framework | [Flet](https://flet.dev/) 0.28.3 |
 | Renderizado PDF | pdf2image + Poppler 24.08.0 |
+| Automatización Outlook | pywin32 (win32com) |
 | Gestión de proyecto | [Poetry](https://python-poetry.org/) |
 
 ---
@@ -29,7 +31,8 @@ Herramienta de escritorio desarrollada en Python con [Flet](https://flet.dev/), 
 
 - Python 3.11 o superior
 - [Poetry](https://python-poetry.org/docs/#installation) instalado
-- Poppler instalado en el sistema (incluido en `src/poppler-24.08.0/` para Windows)
+- Poppler incluido en `src/poppler-24.08.0/` para Windows
+- Microsoft Outlook instalado y configurado (para la funcionalidad Download FACS)
 
 ---
 
@@ -44,7 +47,7 @@ cd prj-python/facret
 poetry install
 
 # Ejecutar la aplicación
-poetry run python src/drive_gui.py
+poetry run python src/main_drive.py
 ```
 
 ---
@@ -58,53 +61,37 @@ facret/
 ├── README.md
 │
 ├── src/                        # Código fuente
-│   ├── drive_gui.py            # Punto de entrada principal
+│   ├── main_drive.py           # Punto de entrada
+│   ├── drive_gui.py            # Orquestador principal de la UI
 │   │
-│   ├── components/             # Componentes UI reutilizables
-│   │   ├── header/             # Encabezado superior (responsivo)
+│   ├── components/             # Componentes UI
+│   │   ├── header/             # Encabezado superior responsivo
 │   │   │   ├── responsive_header.py   # Orquestador del header
 │   │   │   ├── app_brand.py           # Logo y nombre de la app
 │   │   │   ├── search_component.py    # Búsqueda con filtros
 │   │   │   ├── tools_component.py     # Botones de acción
 │   │   │   └── user_session.py        # Sesión y perfil de usuario
-│   │   ├── drive_toolbar.py    # Barra secundaria: hamburguesa + breadcrumb de navegación
-│   │   ├── drive_sidebar.py    # Menú lateral de navegación (colapsable vía toolbar)
+│   │   ├── drive_toolbar.py    # Barra secundaria: hamburguesa + breadcrumb
+│   │   ├── drive_sidebar.py    # Menú lateral de navegación (colapsable)
 │   │   ├── drive_content.py    # Área principal de contenido
-│   │   └── sync_status.py      # Barra de estado inferior
+│   │   └── facs_downloader_panel.py  # Panel de descarga de facturas ETAPA
 │   │
 │   ├── config/
 │   │   └── drive_theme.py      # Tema global: colores, tipografía, estilos
 │   │
-│   ├── core/                   # Lógica de negocio
-│   │   ├── models/             # Estructuras de datos (file_model, xml_model)
-│   │   ├── services/           # Servicios (file, xml, duplicados, renombrado)
-│   │   └── utils/              # Utilidades internas
+│   ├── logic/
+│   │   └── facs_downloader.py  # Lógica de descarga desde Outlook
 │   │
-│   ├── logic/                  # Procesamiento XML
-│   │   ├── logic.py
-│   │   └── xml_processor.py
-│   │
-│   ├── models/                 # Modelos de datos (Registro, RegistroRet)
-│   │   └── models.py
-│   │
-│   ├── utils/                  # Utilidades generales
-│   │   ├── helpers.py
-│   │   └── utiles.py
-│   │
-│   ├── assets/                 # Recursos estáticos
-│   │   ├── favicon.ico
-│   │   └── favicon.png
-│   │
-│   └── poppler-24.08.0/        # Binarios Poppler para Windows (PDF rendering)
+│   └── assets/                 # Recursos estáticos
+│       ├── favicon.ico
+│       └── favicon.png
 │
 ├── data/                       # Datos y plantillas
 │   ├── exports/                # Archivos generados (logs, reportes)
 │   ├── samples/                # Documentos de ejemplo para pruebas
 │   └── templates/              # Plantillas de reportes y XML
 │
-└── docs/                       # Documentación externa
-    ├── api/
-    └── user/
+└── _legacy/                    # Versiones anteriores de la interfaz (no activas)
 ```
 
 ---
@@ -114,55 +101,29 @@ facret/
 El flujo de ejecución sigue un patrón orquestador → componentes:
 
 ```
-drive_gui.py  (orquestador)
-    ├── config/drive_theme.py          ← tema global
-    ├── components/header/
-    │   └── responsive_header.py       ← header con 4 subcomponentes
-    ├── components/drive_toolbar.py    ← barra secundaria: hamburguesa + breadcrumb
-    ├── components/drive_sidebar.py    ← navegación lateral (colapsable)
-    ├── components/drive_content.py    ← contenido + servicios core
-    └── components/sync_status.py      ← estado del sistema
+main_drive.py
+    └── drive_gui.py  (orquestador)
+            ├── config/drive_theme.py              ← tema global
+            ├── components/header/
+            │   └── responsive_header.py           ← header con 4 subcomponentes
+            ├── components/drive_toolbar.py        ← hamburguesa + breadcrumb
+            ├── components/drive_sidebar.py        ← navegación lateral (colapsable)
+            ├── components/drive_content.py        ← contenido principal
+            └── components/facs_downloader_panel.py ← descarga facturas ETAPA
 ```
-
-Para más detalle ver:
-
-- [ARQUITECTURA_RAPIDA.md](ARQUITECTURA_RAPIDA.md) — flujo completo en 5 minutos
-- [ESTRUCTURA_COMPONENTES.md](ESTRUCTURA_COMPONENTES.md) — mapa detallado de dependencias
-- [ESTRUCTURA_VISUAL.md](ESTRUCTURA_VISUAL.md) — diagramas visuales antes/después
 
 ---
 
-## Estado actual del proyecto
-
-### Logros implementados
+## Funcionalidades implementadas
 
 - Interfaz de explorador de archivos completamente funcional con diseño responsivo.
 - Header modular dividido en 4 subcomponentes independientes (brand, search, tools, session).
 - Barra secundaria (`drive_toolbar.py`) con botón hamburguesa y breadcrumb de navegación.
-- Sidebar colapsable: el botón hamburguesa en la toolbar alterna el sidebar entre ancho completo (280px) y oculto (0px) sin perder el botón de control.
-- Breadcrumb reactivo: al navegar entre secciones del sidebar, la toolbar actualiza automáticamente el nombre de la sección activa.
+- Sidebar colapsable: el botón hamburguesa alterna el sidebar entre 280px y oculto.
+- Breadcrumb reactivo: actualiza automáticamente el nombre de la sección activa al navegar.
 - Área de contenido con listado, previsualización y operaciones sobre archivos.
-- Barra de estado con soporte para notificaciones y progreso.
+- Panel de descarga FACS: conecta a Outlook local vía win32com y descarga adjuntos XML/PDF de facturas ETAPA sin requerir cuenta Microsoft paga.
 - Tema centralizado (`drive_theme.py`) que controla toda la paleta visual.
-- Servicios de negocio para procesamiento XML, detección de duplicados y renombrado.
-- Dependencia de Poppler empaquetada para funcionamiento offline en Windows.
-
-### Deuda técnica identificada
-
-Existen archivos legacy de versiones anteriores de la interfaz. Están documentados en [PLAN_LIMPIEZA.md](PLAN_LIMPIEZA.md) con un checklist de eliminación por fases.
-
----
-
-## Documentación interna
-
-| Archivo | Para qué sirve | Tiempo de lectura |
-|---|---|---|
-| [ARQUITECTURA_RAPIDA.md](ARQUITECTURA_RAPIDA.md) | Entender el flujo rápidamente | 5 min |
-| [ESTRUCTURA_COMPONENTES.md](ESTRUCTURA_COMPONENTES.md) | Mapa completo de componentes y dependencias | 10-15 min |
-| [ESTRUCTURA_VISUAL.md](ESTRUCTURA_VISUAL.md) | Diagramas visuales del árbol de archivos | 3 min |
-| [PLAN_LIMPIEZA.md](PLAN_LIMPIEZA.md) | Checklist para eliminar código legacy | 10 min |
-| [RESUMEN_EJECUTIVO.md](RESUMEN_EJECUTIVO.md) | Análisis de archivos huérfanos y recomendaciones | 5 min |
-| [INDICE_DOCUMENTACION.md](INDICE_DOCUMENTACION.md) | Índice maestro de toda la documentación | referencia |
 
 ---
 

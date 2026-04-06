@@ -2,8 +2,8 @@ import os
 import json
 import csv
 import xml.etree.ElementTree as ET
-from src.models.models import Registro, RegistroRet
-from src.utils.utiles import replace_string_onxml, remove_prefix_files, get_files_extension, remove_prefix, get_name, get_path
+from facret._legacy.src.models.models import Registro, RegistroRet
+from facret._legacy.src.utils.utiles import replace_string_onxml, remove_prefix_files, get_files_extension, remove_prefix, get_name, get_path
 
 
 

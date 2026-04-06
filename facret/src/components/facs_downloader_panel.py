@@ -272,6 +272,8 @@ class FacsDownloaderPanel:
         threading.Thread(target=self._do_download, daemon=True).start()
 
     def _do_download(self):
+        import pythoncom
+        pythoncom.CoInitialize()
         try:
             from logic.facs_downloader import DescargadorFacturas
             descargador = DescargadorFacturas(log_callback=self._log)
@@ -283,6 +285,7 @@ class FacsDownloaderPanel:
         except Exception as ex:
             self._log(f"❌ Error: {ex}")
         finally:
+            pythoncom.CoUninitialize()
             self._run_btn.disabled = False
             self._run_btn.update()
 
