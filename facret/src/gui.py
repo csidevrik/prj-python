@@ -1,5 +1,5 @@
 # =============================
-# drive_gui.py
+# gui.py
 # =============================
 import flet as ft
 from components.sidebar                      import DriveSidebarComponent
