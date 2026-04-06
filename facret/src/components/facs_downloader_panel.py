@@ -5,7 +5,7 @@ import flet as ft
 import json
 import threading
 from pathlib import Path
-from config.drive_theme import DriveTheme
+from config.theme import DriveTheme
 
 _CONFIG_PATH = Path(__file__).parent.parent / "config" / "facs_config.json"
 
@@ -57,7 +57,7 @@ class FacsDownloaderPanel:
             spacing=2,
             expand=True,
         )
-        self._run_btn: ft.ElevatedButton = None
+        self._run_btn = None  # asignado en build()
 
     # ── Build ────────────────────────────────────────────────────────────────
 

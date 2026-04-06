@@ -2,7 +2,7 @@
 # components/header/app_brand.py (CORREGIDO)
 # =============================
 import flet as ft
-from config.drive_theme import DriveTheme
+from config.theme import DriveTheme
 
 class AppBrandComponent:
     def __init__(self, app_name: str = "Facret Drive", icon: str = ft.Icons.FOLDER_SPECIAL, compact_mode: bool = False):

@@ -2,7 +2,7 @@
 # components/drive_content.py
 # =============================
 import flet as ft
-from config.drive_theme import DriveTheme
+from config.theme import DriveTheme
 
 class DriveContentComponent:
     def __init__(self, page: ft.Page):

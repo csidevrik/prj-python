@@ -2,7 +2,7 @@
 # components/drive_toolbar.py
 # =============================
 import flet as ft
-from config.drive_theme import DriveTheme
+from config.theme import DriveTheme
 
 NAV_LABELS = {
     "home":      "Página principal",

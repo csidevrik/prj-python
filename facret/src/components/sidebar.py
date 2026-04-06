@@ -3,7 +3,7 @@
 # =============================
 import flet as ft
 from typing import Callable, Optional
-from config.drive_theme import DriveTheme
+from config.theme import DriveTheme
 
 class DriveSidebarComponent:
     def __init__(self, page: ft.Page):

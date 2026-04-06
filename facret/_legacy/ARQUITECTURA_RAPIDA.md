@@ -58,7 +58,7 @@ from components.sync_status import SyncStatusComponent
 
 ### Tema
 ```python
-from config.drive_theme import DriveTheme
+from config.theme import DriveTheme
 # Colores, tipografía, estilos globales
 # Úsalo: DriveTheme.get_theme()
 ```

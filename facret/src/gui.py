@@ -2,11 +2,11 @@
 # drive_gui.py
 # =============================
 import flet as ft
-from components.drive_sidebar               import DriveSidebarComponent
-from components.drive_toolbar               import DriveToolbarComponent
-from components.drive_content               import DriveContentComponent
-from components.header.responsive_header    import ResponsiveDriveHeader as ResponsiveHeaderComponent
-from config.drive_theme                     import DriveTheme
+from components.sidebar                      import DriveSidebarComponent
+from components.toolbar                      import DriveToolbarComponent
+from components.content                      import DriveContentComponent
+from components.header.responsive_header     import ResponsiveDriveHeader as ResponsiveHeaderComponent
+from config.theme                            import DriveTheme
 
 # Mapa de keys del sidebar a componentes
 _CONTENT_MAP = {

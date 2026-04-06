@@ -3,7 +3,7 @@
 # =============================
 import flet as ft
 from typing import Callable, List, Optional
-from config.drive_theme import DriveTheme
+from config.theme import DriveTheme
 
 class SearchComponent:
     def __init__(

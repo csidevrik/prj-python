@@ -2,7 +2,7 @@
 # components/header/responsive_header.py (NUEVO)
 # =============================
 import flet as ft
-from config.drive_theme import DriveTheme
+from config.theme import DriveTheme
 from components.header.app_brand import AppBrandComponent
 from components.header.search_component import SearchComponent
 from .tools_component import ToolsComponent, ToolButton
@@ -181,60 +181,8 @@ class ResponsiveDriveHeader:
         )
     
     def _create_mobile_drawer(self):
-        """Crear drawer/sidebar para móvil con herramientas ocultas"""
-        drawer_tools = [tool for tool in self.tools_config if tool.mobile_priority == 2]
-        
-        drawer_items = [
-            # Sección de búsqueda en drawer
-            ft.Container(
-                content=ft.Column([
-                    ft.Text("Búsqueda", weight=ft.FontWeight.BOLD, size=16),
-                    ft.TextField(
-                        hint_text=self.placeholder,
-                        prefix_icon=ft.Icons.SEARCH,
-                        on_submit=self._drawer_search_submit,
-                        border_radius=8,
-                    )
-                ], spacing=8),
-                padding=ft.padding.all(16),
-                margin=ft.margin.only(bottom=16),
-            ),
-            
-            ft.Divider(height=1),
-            
-            # Sección de herramientas
-            ft.Container(
-                content=ft.Text("Herramientas", weight=ft.FontWeight.BOLD, size=16),
-                padding=ft.padding.symmetric(horizontal=16, vertical=8),
-            )
-        ]
-        
-        # Agregar herramientas al drawer
-        for tool in drawer_tools:
-            drawer_items.append(
-                ft.Container(
-                    content=ft.Row([
-                        ft.Icon(tool.icon, size=20),
-                        ft.Text(tool.tooltip, size=14),
-                        # Badge si existe
-                        ft.Container(
-                            content=ft.Text(str(tool.badge_count), size=10, color=ft.Colors.WHITE),
-                            bgcolor=ft.Colors.RED,
-                            border_radius=8,
-                            padding=ft.padding.all(4),
-                            visible=bool(tool.badge_count),
-                        ) if tool.badge_count else ft.Container()
-                    ], spacing=12),
-                    padding=ft.padding.symmetric(horizontal=16, vertical=12),
-                    on_click=tool.on_click,
-                    ink=True,
-                )
-            )
-        
-        self.drawer = ft.NavigationDrawer(
-            controls=drawer_items,
-            bgcolor=DriveTheme.SURFACE_WHITE,
-        )
+        """Drawer móvil — no implementado (app de escritorio)"""
+        pass
     
     def _toggle_drawer(self, e):
         """Toggle del drawer móvil"""
@@ -242,14 +190,6 @@ class ResponsiveDriveHeader:
             self.page.drawer = self.drawer
             self.page.drawer.open = not getattr(self.page.drawer, 'open', False)
             self.page.update()
-    
-    def _drawer_search_submit(self, e):
-        """Manejar búsqueda desde drawer"""
-        if self.on_search:
-            self.on_search(e.control.value)
-        # Cerrar drawer después de búsqueda
-        self.page.drawer.open = False
-        self.page.update()
     
     def _on_page_resize(self, e):
         """Manejar cambio de tamaño de ventana"""

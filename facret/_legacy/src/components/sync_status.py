@@ -2,7 +2,7 @@
 # components/sync_status.py
 # =============================
 import flet as ft
-from config.drive_theme import DriveTheme
+from config.theme import DriveTheme
 
 class SyncStatusComponent:
     def __init__(self, page: ft.Page):

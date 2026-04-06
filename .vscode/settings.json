@@ -1,3 +1,6 @@
 {
-    "cmake.sourceDirectory": "C:/Users/adminos/dev/github/prj-python/facret/src/poppler-24.08.0/share/poppler"
+    "cmake.sourceDirectory": "C:/Users/adminos/dev/github/prj-python/facret/src/poppler-24.08.0/share/poppler",
+    "python.analysis.extraPaths": [
+        "facret/src"
+    ]
 }
