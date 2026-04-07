@@ -7,23 +7,22 @@ Herramienta de escritorio desarrollada en Python con [Flet](https://flet.dev/), 
 ## Qué hace
 
 - Explora carpetas y lista archivos XML, PDF y otros documentos financieros.
-- Previsualiza archivos de texto y PDF (primera página como imagen).
-- Búsqueda avanzada con resaltado de coincidencias en contenido y nombre de archivo.
 - Procesa y valida XML de facturas y retenciones: extracción de datos, detección de duplicados y renombrado.
 - Descarga facturas ETAPA directamente desde Outlook local (sin cuenta Microsoft paga).
-- Interfaz moderna estilo explorador de archivos con header responsivo, sidebar de navegación y barra de estado.
+- Interfaz moderna estilo explorador de archivos con header responsivo, sidebar de navegación y breadcrumb.
+- Cambio de tema visual en tiempo real desde el panel de configuración.
 
 ---
 
 ## Stack tecnológico
 
-| Componente              | Tecnología                       |
-| ----------------------- | --------------------------------- |
-| Lenguaje                | Python >= 3.11                    |
-| UI Framework            | [Flet](https://flet.dev/) 0.28.3     |
-| Renderizado PDF         | pdf2image + Poppler 24.08.0       |
-| Automatización Outlook | pywin32 (win32com)                |
-| Gestión de proyecto    | [Poetry](https://python-poetry.org/) |
+| Componente             | Tecnología                           |
+| ---------------------- | ------------------------------------- |
+| Lenguaje               | Python >= 3.11                        |
+| UI Framework           | [Flet](https://flet.dev/) 0.28.3      |
+| Renderizado PDF        | pdf2image + Poppler 24.08.0           |
+| Automatización Outlook | pywin32 (win32com)                    |
+| Gestión de proyecto    | [Poetry](https://python-poetry.org/)  |
 
 ---
 
@@ -36,7 +35,7 @@ Herramienta de escritorio desarrollada en Python con [Flet](https://flet.dev/), 
 
 ---
 
-## Instalación
+## Instalación y ejecución en desarrollo
 
 ```bash
 # Clonar el repositorio
@@ -47,7 +46,7 @@ cd prj-python/facret
 poetry install
 
 # Ejecutar la aplicación
-poetry run python src/main_drive.py
+poetry run python src/main.py
 ```
 
 ---
@@ -61,100 +60,103 @@ facret/
 ├── README.md
 │
 ├── src/                        # Código fuente
-│   ├── main_drive.py           # Punto de entrada
-│   ├── drive_gui.py            # Orquestador principal de la UI
+│   ├── main.py                 # Punto de entrada
+│   ├── gui.py                  # Orquestador principal de la UI + router dinámico
 │   │
-│   ├── components/             # Componentes UI
-│   │   ├── header/             # Encabezado superior responsivo
+│   ├── components/             # Componentes UI reutilizables
+│   │   ├── header/
 │   │   │   ├── responsive_header.py   # Orquestador del header
 │   │   │   ├── app_brand.py           # Logo y nombre de la app
 │   │   │   ├── search_component.py    # Búsqueda con filtros
 │   │   │   ├── tools_component.py     # Botones de acción
 │   │   │   └── user_session.py        # Sesión y perfil de usuario
-│   │   ├── drive_toolbar.py    # Barra secundaria: hamburguesa + breadcrumb
-│   │   ├── drive_sidebar.py    # Menú lateral de navegación (colapsable)
-│   │   ├── drive_content.py    # Área principal de contenido
-│   │   └── facs_downloader_panel.py  # Panel de descarga de facturas ETAPA
+│   │   ├── toolbar.py          # Barra secundaria: hamburguesa + breadcrumb
+│   │   ├── sidebar.py          # Menú lateral de navegación (colapsable)
+│   │   └── settings_panel.py   # Panel de configuración y cambio de tema
+│   │
+│   ├── pages/                  # Páginas cargadas dinámicamente por el router
+│   │   ├── home_page.py        # Página principal
+│   │   ├── facs_downloader_page.py  # Descarga de facturas ETAPA
+│   │   └── facs_manager_page.py     # Gestión y procesamiento de facturas
 │   │
 │   ├── config/
-│   │   └── drive_theme.py      # Tema global: colores, tipografía, estilos
+│   │   ├── menu_config.py      # Fuente única de verdad para la navegación
+│   │   ├── theme.py            # Tema global: colores, tipografía, estilos
+│   │   ├── facs_config.json    # Configuración de rutas y parámetros FACS
+│   │   └── gradients.json      # Paleta de gradientes para el tema
 │   │
 │   ├── logic/
-│   │   └── facs_downloader.py  # Lógica de descarga desde Outlook
+│   │   ├── facs_downloader.py  # Descarga desde Outlook vía win32com
+│   │   └── facs_manager.py     # Procesamiento de XML: parseo, renombrado, CSV/JSON
 │   │
-│   └── assets/                 # Recursos estáticos
-│       ├── favicon.ico
-│       └── favicon.png
+│   ├── models/
+│   │   └── models.py           # Dataclasses: Factura, Retencion
+│   │
+│   ├── assets/                 # Recursos estáticos
+│   │   ├── favicon.ico
+│   │   ├── favicon.png
+│   │   └── icon.png            # Ícono usado por flet build
+│   │
+│   └── poppler-24.08.0/        # Binarios Poppler para Windows (pdf2image)
 │
-├── data/                       # Datos y plantillas
-│   ├── exports/                # Archivos generados (logs, reportes)
-│   ├── samples/                # Documentos de ejemplo para pruebas
-│   └── templates/              # Plantillas de reportes y XML
+├── data/
+│   └── exports/                # Archivos generados (logs, reportes)
 │
-└── _legacy/                    # Versiones anteriores de la interfaz (no activas)
+└── _legacy/                    # Versiones anteriores (no activas)
 ```
 
 ---
 
 ## Arquitectura
 
-El flujo de ejecución sigue un patrón orquestador → componentes:
+El router en `gui.py` carga las páginas dinámicamente usando `importlib`. Para agregar una nueva sección basta con registrarla en `config/menu_config.py`.
 
 ```
-main_drive.py
-    └── drive_gui.py  (orquestador)
-            ├── config/drive_theme.py              ← tema global
-            ├── components/header/
-            │   └── responsive_header.py           ← header con 4 subcomponentes
-            ├── components/drive_toolbar.py        ← hamburguesa + breadcrumb
-            ├── components/drive_sidebar.py        ← navegación lateral (colapsable)
-            ├── components/drive_content.py        ← contenido principal
-            └── components/facs_downloader_panel.py ← descarga facturas ETAPA
+main.py
+  └── gui.py  (orquestador + router)
+        ├── config/theme.py                    ← tema global
+        ├── config/menu_config.py              ← registro de rutas
+        ├── components/header/
+        │   └── responsive_header.py           ← header con 4 subcomponentes
+        ├── components/toolbar.py              ← hamburguesa + breadcrumb
+        ├── components/sidebar.py              ← navegación lateral (colapsable)
+        └── pages/  (cargadas dinámicamente)
+            ├── home_page.py
+            ├── facs_downloader_page.py
+            └── facs_manager_page.py
 ```
 
 ---
 
-## Funcionalidades implementadas
+## Compilar el ejecutable para Windows
 
-- Interfaz de explorador de archivos completamente funcional con diseño responsivo.
-- Header modular dividido en 4 subcomponentes independientes (brand, search, tools, session).
-- Barra secundaria (`drive_toolbar.py`) con botón hamburguesa y breadcrumb de navegación.
-- Sidebar colapsable: el botón hamburguesa alterna el sidebar entre 280px y oculto.
-- Breadcrumb reactivo: actualiza automáticamente el nombre de la sección activa al navegar.
-- Área de contenido con listado, previsualización y operaciones sobre archivos.
-- Panel de descarga FACS: conecta a Outlook local vía win32com y descarga adjuntos XML/PDF de facturas ETAPA sin requerir cuenta Microsoft paga.
-- Tema centralizado (`drive_theme.py`) que controla toda la paleta visual.
+Requiere [Flutter](https://docs.flutter.dev/get-started/install) y Flet CLI instalados.
+
+```bash
+cd facret
+flet build windows src --project FACRET --product "FACRET" --org com.facret
+```
+
+El `.exe` resultante queda en `src/build/windows/facret.exe`.
+
+> **Importante:** `main.py` debe llamar a `run_drive_gui()` sin el guard `if __name__ == "__main__":`, ya que Flet importa el módulo en lugar de ejecutarlo directamente.
 
 ---
 
+## Cambiar el ícono del ejecutable compilado
 
+El build de Flet usa `src/assets/icon.png` para el ícono de la ventana. Para cambiar también el ícono del `.exe` a nivel del sistema operativo, usar **rcedit**:
 
-Mapeo del código monolítico → estructura del proyecto
-El archivo que me pasaste tiene funciones que encajan así:
+1. Descargar `rcedit-x64.exe` desde: `github.com/electron/rcedit/releases`
+2. Ejecutar en PowerShell:
 
-![1775458934441](image/README/1775458934441.png)
-Pasos para migrar
-Paso 1 — models/models.py (lo más simple, sin dependencias)
+```powershell
+.\rcedit-x64.exe "src\build\windows\facret.exe" --set-icon "src\assets\favicon.ico"
+```
 
-Mover Registro y RegistroRet
-Paso 2 — logic/xml_cleaner.py (solo usa stdlib: os, re)
+> El archivo `.ico` debe contener múltiples resoluciones (16x16, 32x32, 48x48, 256x256). Se puede generar desde `favicon.png` con herramientas como GIMP o icoconvert.com.
 
-Mover las funciones de limpieza de XML (clean_xml_files y sus helpers)
-Paso 3 — logic/xml_processor.py (depende de models + xml_cleaner)
-
-Mover extract_xml_data, extract_xml_content, get_register_xml_retencion, process_all_xml_files, process_all_xml_rets
-Paso 4 — logic/file_utils.py (solo usa stdlib)
-
-Mover remove_duplicate_files, remove_prefix_files_pdf, rename_files_with_attributes
-Paso 5 — logic/data_exporter.py (depende de xml_processor)
-
-Mover json_to_csv, update_json_with_xml_data
-Paso 6 — logic/browser_utils.py (solo usa stdlib)
-
-Mover open_pdf_with_*, get_browser_command
-Paso 7 — conectar al menú en components/
-
-Crear components/file_tools_menu.py con el PopupMenuButton que llama a la lógica nueva
+---
 
 ## Licencia
 
