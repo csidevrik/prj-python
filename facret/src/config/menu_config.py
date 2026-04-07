@@ -43,6 +43,12 @@ MENU_ITEMS: List[MenuItem] = [
         icon=ft.Icons.FOLDER_SPECIAL_OUTLINED,
         page_class="pages.facs_manager_page.FacsManagerPage",
     ),
+    MenuItem(
+        key="contracts",
+        label="Contratos ETAPA",
+        icon=ft.Icons.RECEIPT_LONG_OUTLINED,
+        page_class="pages.contracts_page.ContractsPage",
+    ),
     MenuItem(key="computers", label="Ordenadores",        icon=ft.Icons.COMPUTER_OUTLINED),
     MenuItem(key="shared",    label="Compartido conmigo", icon=ft.Icons.PEOPLE_OUTLINED),
     MenuItem(key="recent",    label="Reciente",           icon=ft.Icons.ACCESS_TIME),

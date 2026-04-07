@@ -158,6 +158,118 @@ El build de Flet usa `src/assets/icon.png` para el ícono de la ventana. Para ca
 
 ---
 
+## Visión: Monitoreo en tiempo real de enlaces ETAPA
+
+> Esta sección documenta la arquitectura planeada para automatizar la columna
+> `estado_operativo` (UP/DOWN) del dashboard de contratos, eliminando la actualización
+> manual del JSON y generando estadísticas objetivas de disponibilidad.
+
+### El problema
+
+El campo `estado_operativo` hoy se actualiza **a mano** en el JSON. Un enlace puede
+caerse a las 2 AM y nadie lo sabe hasta el día siguiente. Sin registros precisos de
+fechas y duraciones de caída, es imposible negociar con ETAPA EP desde una posición
+de evidencia.
+
+### Conceptos MQTT (glosario rápido)
+
+| Rol | Qué hace | Ejemplo en este sistema |
+|---|---|---|
+| **Publisher** | Detecta un cambio y publica el mensaje | Script que hace ping a la IP pública |
+| **Broker** | Recibe y retransmite mensajes (cartero) | Mosquitto corriendo en VPS externo |
+| **Subscriber** | Se suscribe a un topic y reacciona | Servicio Windows, app FACRET |
+
+> El broker **no genera datos** — solo retransmite. El error más común es confundirlo
+> con el publisher.
+
+### Arquitectura propuesta
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  CAPA 1 — Publishers (agentes de monitoreo)                      │
+│                                                                  │
+│  [Agente Externo]               [Agente Interno]                 │
+│  VPS/AWS — fuera de red EMOV    Servidor dentro de red EMOV      │
+│  · ping a IPs públicas          · ping a IPs privadas (RDD)      │
+│  · monitorea enlaces IO*        · monitorea enlaces RDD*         │
+│  · alta disponibilidad          · complementa al externo         │
+│                                                                  │
+│  Publica en topic:  enlaces/{cod_serv}/estado                    │
+│  Payload:           {"op": "DOWN", "ts": "2025-04-07T14:32:00"}  │
+└──────────────────┬───────────────────────┬───────────────────────┘
+                   │                       │
+                   ▼                       ▼
+┌──────────────────────────────────────────────────────────────────┐
+│  CAPA 2 — Broker MQTT (Mosquitto)                                │
+│  Vive en el mismo VPS externo. Solo retransmite.                 │
+│  Topic ejemplo: enlaces/IO247969/estado                          │
+└──────────────────────────────┬───────────────────────────────────┘
+                               │
+               ┌───────────────┴────────────────┐
+               │                                │
+               ▼                                ▼
+┌──────────────────────────┐     ┌──────────────────────────────┐
+│  SERVICIO WINDOWS        │     │  APP FACRET (escritorio)     │
+│  (subscriber principal)  │     │  (subscriber secundario)     │
+│                          │     │                              │
+│  · Graba evento en       │     │  · Muestra notificación      │
+│    SQLite (historial)    │◄────│    en pantalla si está       │
+│  · Actualiza JSON del    │     │    abierta                   │
+│    contrato (UP/DOWN)    │     │  · Lee SQLite para mostrar   │
+│  · DOWN > 15 min:        │     │    historial de eventos      │
+│    → email a ETAPA EP    │     │                              │
+│    → notif Discord/Teams │     └──────────────────────────────┘
+└──────────────────────────┘
+         │
+         ▼
+┌──────────────────────────┐
+│  SQLite (eventos.db)     │
+│  tabla: eventos_enlace   │
+│  · cod_serv              │
+│  · ts_inicio (DOWN)      │
+│  · ts_fin (UP)           │
+│  · duracion_min          │
+└──────────────────────────┘
+```
+
+### Por qué este diseño es robusto
+
+**FACRET puede estar cerrado** durante una caída y no se pierde nada — el Servicio
+Windows captura todo en SQLite. Cuando el usuario abre FACRET, verá el historial
+completo porque lee la base de datos, no el stream MQTT.
+
+**Por qué SQLite y no MongoDB:**
+
+| | SQLite | MongoDB |
+|---|---|---|
+| Instalación | Cero — viene con Python | Requiere servidor |
+| Para 140 servicios | Más que suficiente | Overkill |
+| Archivo portable | Sí, un solo `.db` | No |
+| Consultas de uptime | SQL nativo | Aggregation pipeline |
+
+MongoDB tiene sentido con millones de registros o múltiples servidores escribiendo
+simultáneamente. Con 140 servicios y eventos esporádicos, SQLite es la elección correcta.
+
+### Por qué MQTT y no REST
+
+| Criterio | REST (polling cada N seg.) | MQTT (pub/sub) |
+|---|---|---|
+| Latencia de detección | N segundos de demora | Instantáneo |
+| Carga de red | Alta — 140 servicios × polling | Mínima — solo al cambiar |
+| Si no hay cambios | Tráfico igual | Tráfico cero |
+| Escalabilidad | Difícil | Natural — un topic por servicio |
+
+### Valor operativo
+
+- **Uptime real** por enlace y por período, calculado automáticamente.
+- **Evidencia documentada** de cada caída: fecha, hora, duración exacta.
+- **Negociación con ETAPA EP** respaldada por datos objetivos al renovar contratos.
+- **Email automático a ETAPA** a los 15 minutos de caída — traslada la responsabilidad
+  al proveedor y genera registro formal del incidente.
+- **Notificación interna** (Discord/Teams/correo) al equipo técnico de EMOV EP.
+
+---
+
 ## Licencia
 
 MIT — Carlos Sigua

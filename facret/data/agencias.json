@@ -1,0 +1,140 @@
+{
+  "EMOV-PRINCIPAL": {
+    "id": "EMOV-PRINCIPAL",
+    "nombre": "EMOV EP Edificio Principal",
+    "direccion": "",
+    "tipo": "sede_central"
+  },
+  "DATACENTER-ETAPA": {
+    "id": "DATACENTER-ETAPA",
+    "nombre": "EMOV EP — Data Center ETAPA",
+    "direccion": "",
+    "tipo": "datacenter"
+  },
+  "EMOV-MISICATA": {
+    "id": "EMOV-MISICATA",
+    "nombre": "EMOV EP Misicata",
+    "direccion": "",
+    "tipo": "sede"
+  },
+  "ETAPA-CEBOLLAR": {
+    "id": "ETAPA-CEBOLLAR",
+    "nombre": "ETAPA EP Cebollar",
+    "direccion": "",
+    "tipo": "nodo_proveedor"
+  },
+  "CAPULISPAMBA": {
+    "id": "CAPULISPAMBA",
+    "nombre": "Agencia Capulispamba",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "MAYANCELA": {
+    "id": "MAYANCELA",
+    "nombre": "Agencia Mayancela",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "TTERRESTRE": {
+    "id": "TTERRESTRE",
+    "nombre": "Terminal Terrestre",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "PQM": {
+    "id": "PQM",
+    "nombre": "Agencia PQM",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "AREN": {
+    "id": "AREN",
+    "nombre": "Agencia AREN",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "9DEOCTUBRE": {
+    "id": "9DEOCTUBRE",
+    "nombre": "Agencia 9 de Octubre",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "CALAIRE1-TALCALDIA": {
+    "id": "CALAIRE1-TALCALDIA",
+    "nombre": "Calle Larga 1 — Talcaldía",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "SJOAQUIN": {
+    "id": "SJOAQUIN",
+    "nombre": "Agencia San Joaquín",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "CDIT": {
+    "id": "CDIT",
+    "nombre": "CDIT",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "U-FLAGRANCIA": {
+    "id": "U-FLAGRANCIA",
+    "nombre": "Unidad de Flagrancia",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "CALAIRE3-IESCANDON": {
+    "id": "CALAIRE3-IESCANDON",
+    "nombre": "Calle Larga 3 — IE Escandón",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "10DEAGOSTO": {
+    "id": "10DEAGOSTO",
+    "nombre": "Agencia 10 de Agosto",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "12DEABRIL": {
+    "id": "12DEABRIL",
+    "nombre": "Agencia 12 de Abril",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "03PUENTES": {
+    "id": "03PUENTES",
+    "nombre": "Agencia 3 Puentes",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "CONSEJO-SEGUCIUDAD": {
+    "id": "CONSEJO-SEGUCIUDAD",
+    "nombre": "Consejo de Seguridad Ciudadana",
+    "direccion": "",
+    "tipo": "externo"
+  },
+  "CALAIRE2-JMONTALVO": {
+    "id": "CALAIRE2-JMONTALVO",
+    "nombre": "Calle Larga 2 — J. Montalvo",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "03DENOVIEMBRE": {
+    "id": "03DENOVIEMBRE",
+    "nombre": "Agencia 3 de Noviembre",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "24DEMAYO": {
+    "id": "24DEMAYO",
+    "nombre": "Agencia 24 de Mayo",
+    "direccion": "",
+    "tipo": "agencia"
+  },
+  "EDEC": {
+    "id": "EDEC",
+    "nombre": "EDEC EP",
+    "direccion": "",
+    "tipo": "externo"
+  }
+}
