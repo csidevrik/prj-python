@@ -1,0 +1,25 @@
+[project]
+name = "gaara-proy"
+version = "0.1.0"
+description = "Proyecto Python para extraer datos estructurados de comprobantes de retención emitidos por **EMOV** (Empresa Municipal de Movilidad, Cuenca, Ecuador)."
+authors = [
+    {name = "general iroh",email = "carlos.sigua@gmail.com"}
+]
+package-mode = false
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests (>=2.33.1,<3.0.0)",
+    "pymupdf (>=1.27.2.2,<2.0.0.0)",
+    "python-dotenv (>=1.2.2,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.0.2"
+black = "^26.3.1"
+
