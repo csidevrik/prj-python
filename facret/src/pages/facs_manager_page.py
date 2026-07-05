@@ -5,6 +5,7 @@ import flet as ft
 import threading
 from config.theme import AppTheme as T
 from logic import facs_manager as fm
+from logic.config_manager import load_config, set_value
 
 
 # ── Definición de acciones ─────────────────────────────────────────────────────
@@ -69,7 +70,7 @@ class FacsManagerPage:
 
         # ── Folder picker ──────────────────────────────────────────────────
         self._folder_field = ft.TextField(
-            value=page.session.get("gfacs_folder") or "",
+            value=load_config().get("carpeta_trabajo", ""),
             hint_text="Selecciona o escribe la ruta de la carpeta...",
             border_color=T.OUTLINE,
             focused_border_color=T.PRIMARY,
@@ -345,8 +346,8 @@ class FacsManagerPage:
     def _on_picker_result(self, e: ft.FilePickerResultEvent):
         if e.path:
             self._folder_field.value = e.path
-            self.page.session["gfacs_folder"] = e.path
+            set_value("carpeta_trabajo", e.path)
             self._folder_field.update()
 
     def _on_folder_change(self, e):
-        self.page.session["gfacs_folder"] = e.control.value
+        set_value("carpeta_trabajo", e.control.value)

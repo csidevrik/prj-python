@@ -2,25 +2,15 @@
 # pages/facs_downloader_page.py
 # =============================
 import flet as ft
-import json
 import threading
-from pathlib import Path
 from config.theme import DriveTheme
-
-_CONFIG_PATH = Path(__file__).parent.parent / "config" / "facs_config.json"
-
-_DEFAULT_CONFIG = {
-    "carpeta_outlook":     "Inbox\\CONTRACT\\ETAPA\\FACS",
-    "correo_remitente":    "info@comunicados-etapa.com",
-    "correo_destinatario": "csigua@emov.gob.ec",
-    "carpeta_guardar":     "D:\\Facturas_ETAPA",
-}
+from logic.config_manager import load_config, save_config
 
 
 class FacsDownloaderPage:
     def __init__(self, page: ft.Page):
         self.page = page
-        self._config = self._load_config()
+        self._config = load_config()
 
         self._tf_outlook = ft.TextField(
             value=self._config.get("carpeta_outlook", ""),
@@ -185,15 +175,6 @@ class FacsDownloaderPage:
 
     # ── Logic ────────────────────────────────────────────────────────────────
 
-    def _load_config(self) -> dict:
-        if _CONFIG_PATH.exists():
-            try:
-                with open(_CONFIG_PATH, encoding="utf-8") as f:
-                    return json.load(f)
-            except Exception:
-                pass
-        return _DEFAULT_CONFIG.copy()
-
     def _save_config(self, e):
         data = {
             "carpeta_outlook":     self._tf_outlook.value,
@@ -201,9 +182,7 @@ class FacsDownloaderPage:
             "correo_destinatario": self._tf_destinatario.value,
             "carpeta_guardar":     self._tf_guardar.value,
         }
-        _CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-        with open(_CONFIG_PATH, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+        save_config(data)
         self._log("Configuracion guardada correctamente.")
 
     def _run_download(self, e):

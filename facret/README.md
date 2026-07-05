@@ -49,6 +49,28 @@ poetry install
 poetry run python src/main.py
 ```
 
+### Ejecución desde diferentes ubicaciones
+
+**Desde el directorio `facret/` (recomendado):**
+```bash
+cd facret
+poetry run python src/main.py
+```
+
+**Desde la raíz del repo:**
+```bash
+cd facret && poetry run python src/main.py
+```
+
+**O activar el entorno virtual y ejecutar directamente:**
+```bash
+cd facret
+poetry shell
+python src/main.py
+```
+
+> ⚠️ **Nota importante:** `poetry run` SIEMPRE debe ejecutarse desde el directorio donde está `pyproject.toml`. Si ejecutas `poetry run \src\main.py` desde la raíz, Poetry no encontrará el archivo de configuración y fallará. La ruta debe usar `/` no `\`.
+
 ---
 
 ## Estructura del proyecto

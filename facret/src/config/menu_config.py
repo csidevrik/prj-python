@@ -48,12 +48,7 @@ MENU_ITEMS: List[MenuItem] = [
         label="Contratos ETAPA",
         icon=ft.Icons.RECEIPT_LONG_OUTLINED,
         page_class="pages.contracts_page.ContractsPage",
-    ),
-    MenuItem(key="computers", label="Ordenadores",        icon=ft.Icons.COMPUTER_OUTLINED),
-    MenuItem(key="shared",    label="Compartido conmigo", icon=ft.Icons.PEOPLE_OUTLINED),
-    MenuItem(key="recent",    label="Reciente",           icon=ft.Icons.ACCESS_TIME),
-    MenuItem(key="starred",   label="Destacados",         icon=ft.Icons.STAR_OUTLINE),
-    MenuItem(key="trash",     label="Papelera",           icon=ft.Icons.DELETE_OUTLINE),
+    )
 ]
 
 # Ítems del sistema (no aparecen en el sidebar principal, pero el router los conoce)
