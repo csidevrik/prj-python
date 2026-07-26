@@ -1,353 +1,551 @@
-# Prompt — Proyecto base Flet (Desktop App)
+# 🏗️ Flet Modular — Blueprint Arquitectónico Reutilizable
 
-Quiero construir una aplicación de escritorio en Python usando Flet, siguiendo
-exactamente la arquitectura de un proyecto de referencia que ya existe y funciona.
-El objetivo es tener una base reutilizable para cualquier nuevo proyecto.
+Plantilla base para construir aplicaciones de escritorio Flet con **arquitectura modular, escalable y profesional**.
 
----
-
-## STACK
-
-- Python >= 3.11
-- Flet 0.28.x (flet + flet-desktop)
-- Poetry para gestión de dependencias
-- Compilación con: `flet build windows src --project APPNAME --product "APPNAME" --org com.empresa`
+Esta es una **arquitectura de referencia** — copiar, adaptar y reutilizar en nuevos proyectos sin modificar los patrones base.
 
 ---
 
-## ESTRUCTURA DE CARPETAS
+## 🎯 Principios Clave
+
+```
+┌─────────────────────────────────────────┐
+│         FRONTEND (UI pura)              │
+│   components/ + pages/ + gui.py         │
+├─────────────────────────────────────────┤
+│         BACKEND (Lógica sin UI)         │
+│   logic/ (sin dependencias de Flet)     │
+├─────────────────────────────────────────┤
+│    DATA (Estructuras de datos)          │
+│   models/ + config/                     │
+└─────────────────────────────────────────┘
+```
+
+**Objetivo:** Separación clara permite testabilidad, reutilización y crecimiento escalable.
+
+---
+
+## 📦 Stack Recomendado
+
+- **Python:** 3.11+
+- **UI Framework:** Flet 0.28.x (desktop)
+- **Package Manager:** Poetry
+- **Build:** `flet build windows src`
+
+---
+
+## 📁 Estructura de Carpetas (Copy/Paste)
 
 ```
 src/
-├── main.py                  # Punto de entrada — llama run_app() sin guard __main__
-├── gui.py                   # Orquestador + router dinámico
-├── assets/
-│   ├── favicon.ico
-│   ├── favicon.png
-│   └── icon.png             # Ícono usado por flet build
-├── components/
+├── main.py                      # Entry point — NO usar if __name__ == "__main__"
+├── gui.py                       # Orquestador + router dinámico
+│
+├── config/                      # ⚙️ CONFIGURACIÓN GLOBAL
+│   ├── menu_config.py           # Menú navegación (fuente única de verdad)
+│   ├── theme.py                 # Tema Material Design 3
+│   └── app_config.json          # Configuración persistente (opcional)
+│
+├── components/                  # 🎨 UI REUTILIZABLE (agnóstica a la lógica)
 │   ├── header/
 │   │   ├── responsive_header.py
 │   │   ├── app_brand.py
 │   │   ├── search_component.py
 │   │   ├── tools_component.py
 │   │   └── user_session.py
-│   ├── sidebar.py
-│   ├── toolbar.py
-│   └── settings_panel.py
-├── pages/
-│   ├── home_page.py
-│   └── <nombre>_page.py     # Una por cada sección del menú
-├── config/
-│   ├── menu_config.py       # Fuente única de verdad de la navegación
-│   └── theme.py             # AppTheme — paleta semántica + helpers
-├── logic/                   # Lógica de negocio sin dependencias de UI
-└── models/
-    └── models.py            # Dataclasses de dominio
+│   ├── sidebar.py               # Navegación
+│   ├── toolbar.py               # Breadcrumb
+│   ├── settings_panel.py        # Configuración
+│   └── helpers.py               # Componentes genéricos reutilizables
+│
+├── pages/                       # 📄 VISTAS (específicas de cada sección)
+│   ├── home_page.py             # Dashboard inicial
+│   └── <seccion>_page.py        # Una por cada menú
+│
+├── logic/                       # 🧠 LÓGICA DE NEGOCIO (SIN FLET)
+│   ├── logger.py                # Logging centralizado
+│   ├── config_manager.py        # R/W config persistente
+│   └── <dominio>_logic.py       # Tu lógica de negocio aquí
+│
+├── models/                      # 📊 ESTRUCTURAS DE DATOS (Dataclasses)
+│   └── models.py
+│
+└── assets/                      # 🖼️ RECURSOS
+    ├── icon.png
+    └── favicon.ico
 ```
 
 ---
 
-## ARQUITECTURA DE NAVEGACIÓN (gui.py)
+## 🔄 Flujo de Arquitectura
 
-`gui.py` orquesta toda la UI. Implementa:
-
-**1. Router dinámico con importlib:**
+### Capa 1: Entry Point (`main.py`)
 ```python
-def _load_page(page_class_path: str, flet_page) -> ft.Control:
+import flet as ft
+from gui import run_app
+
+def main():
+    ft.app(target=run_app)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Capa 2: Orquestación (`gui.py`)
+- ✅ Router dinámico (cargar páginas via `importlib`)
+- ✅ Layout principal (header, sidebar, content area)
+- ✅ Callbacks compartidos (`page.data`)
+- ✅ Actualización de temas y navegación
+
+**Responsabilidades:**
+- NO contiene lógica de negocio
+- NO contiene componentes específicos
+- SÍ orquesta la experiencia de usuario
+
+### Capa 3: UI (`components/` + `pages/`)
+
+#### **components/** — Reutilizable, agnóstica
+```python
+# ✅ Puede usarse en múltiples páginas
+def build_stat_card(label: str, value: str) -> ft.Container:
+    return ft.Container(...)
+
+def build_action_card(icon, label, description) -> ft.Container:
+    return ft.Container(...)
+```
+
+#### **pages/** — Específica de cada sección
+```python
+class HomePage:
+    def __init__(self, page):
+        self.page = page
+    
+    def build(self) -> ft.Control:
+        # Usa components/ + logic/
+        return ft.Container(...)
+```
+
+### Capa 4: Lógica (`logic/`)
+```python
+# ❌ NUNCA importa Flet
+# ✅ Puro, testeable, reutilizable
+
+def procesar_datos(input_data):
+    """Lógica de negocio pura"""
+    resultado = ...
+    return resultado
+```
+
+### Capa 5: Datos (`models/` + `config/`)
+```python
+@dataclass
+class Entidad:
+    campo1: str
+    campo2: int
+    # Sin métodos complejos
+```
+
+---
+
+## 🎨 Sistema de Temas (config/theme.py)
+
+**Semántica Material Design 3:**
+
+```python
+class AppTheme:
+    # Colores semánticos (NUNCA hardcodear en componentes)
+    PRIMARY = "#0b5f78"
+    SECONDARY = "#0097a7"
+    SUCCESS = "#1a7a4a"
+    ERROR = "#ba1a1a"
+    SURFACE = "#ffffff"
+    ON_SURFACE = "#1a2b2e"
+    
+    @staticmethod
+    def get_theme() -> ft.Theme:
+        return ft.Theme(color_scheme_seed=AppTheme.PRIMARY)
+```
+
+**Uso en componentes:**
+```python
+from config.theme import AppTheme as T
+
+ft.Text("Hola", color=T.PRIMARY)  # ✅ Centralizado
+# ❌ NO: ft.Text("Hola", color="#0b5f78")  # Hardcoding
+```
+
+---
+
+## 🧭 Router Dinámico (gui.py)
+
+```python
+import importlib
+
+def _load_page(page_class_path: str, flet_page):
+    """Carga cualquier página sin hardcode"""
     module_path, class_name = page_class_path.rsplit(".", 1)
     module = importlib.import_module(module_path)
     cls = getattr(module, class_name)
     return cls(flet_page).build()
+
+def on_navigate(key: str):
+    """Callback de navegación"""
+    item = next((i for i in MENU_ITEMS if i.key == key), None)
+    if item and item.page_class:
+        page.content_area.content = _load_page(item.page_class, page)
+        page.content_area.update()
 ```
 
-**2. Función `rebuild()`** que reconstruye todos los componentes desde cero
-(header, sidebar, toolbar, content_area). Se llama al iniciar y cada vez
-que el usuario cambia el tema.
-
-**3. Callback `on_navigate(key)`** compartido entre sidebar y header,
-expuesto a las páginas vía:
-```python
-page.data = {"on_navigate": on_navigate, "on_theme_change": rebuild}
-```
-
-**4. Layout fijo:**
-```
-Column [
-  Header           (fijo arriba)
-  Toolbar/breadcrumb (fijo debajo del header)
-  Row [
-    Sidebar (colapsable, 280px)
-    Container(expand=True)  ← aquí se inyecta la página activa
-  ]
-]
-```
+**Ventaja:** Agregar página nueva = solo 2 líneas en `menu_config.py`
 
 ---
 
-## MENU CONFIG (config/menu_config.py)
+## 📋 Menú Dinámico (config/menu_config.py)
 
-Fuente única de verdad. Para agregar una página al menú, solo hay que
-registrarla aquí. El router la carga automáticamente.
+**Fuente única de verdad:**
 
 ```python
+from dataclasses import dataclass, field
+
 @dataclass
 class MenuItem:
     key: str
     label: str
-    icon: str               # ft.Icons.XXXX
-    page_class: str | None  # "pages.module.ClassName"
-    children: list[MenuItem] = field(default_factory=list)
+    icon: str
+    page_class: str | None = None
+    children: list = field(default_factory=list)
 
 MENU_ITEMS = [
-    MenuItem(key="home",     label="Inicio",    icon=ft.Icons.HOME_OUTLINED,
-             page_class="pages.home_page.HomePage"),
-    MenuItem(key="seccion1", label="Sección 1", icon=ft.Icons.XXXX,
-             page_class="pages.seccion1_page.Seccion1Page"),
-    # agregar secciones reales del proyecto
-]
-
-SYSTEM_ITEMS = [   # No aparecen en el sidebar, pero el router los conoce
-    MenuItem(key="settings", label="Configuración",
-             page_class="components.settings_panel.SettingsPanel"),
-    MenuItem(key="profile",  label="Perfil", page_class=None),
-    MenuItem(key="help",     label="Ayuda",  page_class=None),
-]
-
-ALL_ITEMS = MENU_ITEMS + SYSTEM_ITEMS
-```
-
----
-
-## SIDEBAR (components/sidebar.py)
-
-Clase `DriveSidebarComponent`. Implementa tres zonas:
-
-**ZONA SUPERIOR — Buscador de menús**
-- `TextField` con `on_change` que filtra `MENU_ITEMS` por label
-- Mientras hay texto: oculta `_nav_column`, muestra `_results_card` (lista filtrada)
-- Al seleccionar resultado: limpia búsqueda, navega, restaura menú normal
-- La búsqueda usa `flat_menu()` para soportar ítems con `children` en el futuro
-
-**ZONA MEDIA — Menú de navegación**
-- Lista de `ListTile` por cada `MenuItem`
-- Ítem seleccionado: fondo con opacidad 10% del PRIMARY, texto e ícono en PRIMARY
-- Al hacer clic: actualiza `selected_item`, reconstruye la lista, llama `on_nav_change`
-
-**ZONA INFERIOR — Footer fijo al fondo (estilo ChatGPT)**
-- Sección de almacenamiento con `ProgressBar` (decorativa, configurable)
-- `Divider`
-- Avatar circular con iniciales + nombre + email + `PopupMenuButton` (icono `···`) con opciones:
-  - Perfil → navega a `"profile"`
-  - Configuración → navega a `"settings"`
-  - Ayuda → navega a `"help"`
-  - `[Divider]`
-  - Cerrar sesión (en color ERROR)
-
-Método `_toggle_sidebar(e)`: alterna `width` entre 280 y 0.
-El botón hamburguesa del toolbar llama a este método.
-
----
-
-## TOOLBAR / BREADCRUMB (components/toolbar.py)
-
-Barra delgada debajo del header. Contiene:
-- `IconButton` hamburguesa → llama `sidebar._toggle_sidebar`
-- `Icon` CHEVRON_RIGHT
-- `Text` con el label de la sección activa
-
-Método `update_breadcrumb(key)`: actualiza el texto buscando el label en:
-```python
-LABEL_MAP = {item.key: item.label for item in ALL_ITEMS}
-```
-
----
-
-## HEADER (components/header/)
-
-`ResponsiveDriveHeader` orquesta 4 subcomponentes en un `Row`:
-1. `AppBrandComponent` — ícono de la app + nombre en texto
-2. `SearchComponent` — `TextField` de búsqueda global (`expand=True`)
-3. `ToolsComponent` — botones de acción rápida (`IconButton`)
-4. `UserSessionComponent` — avatar del usuario
-
-El header acepta un callback `on_navigate` para que los botones de herramientas
-puedan navegar a secciones.
-
----
-
-## SISTEMA DE TEMAS (config/theme.py)
-
-Una sola clase `AppTheme` con atributos de clase (no de instancia).
-Nombres semánticos siguiendo Material Design 3:
-
-```python
-class AppTheme:
-    SEED = "#007a8c"
-    PRIMARY = "#0b5f78"
-    ON_PRIMARY = "#ffffff"
-    PRIMARY_CONTAINER = "#b8dde6"
-    SECONDARY = "#0097a7"
-    SURFACE = "#ffffff"
-    SURFACE_VARIANT = "#f0f7f8"
-    ON_SURFACE = "#1a2b2e"
-    ON_SURFACE_VARIANT = "#3d5a5e"
-    OUTLINE = "#c2d8db"
-    ERROR = "#ba1a1a"
-    SUCCESS = "#1a7a4a"
-
-    @staticmethod
-    def get_theme() -> ft.Theme:
-        return ft.Theme(color_scheme_seed=AppTheme.SEED,
-                        visual_density=ft.VisualDensity.COMPACT)
-
-    @staticmethod
-    def get_card_style() -> dict:
-        # bgcolor=SURFACE, border_radius=12, BoxShadow sutil
-        ...
-
-    @staticmethod
-    def avatar_style(initials: str, size: int = 32) -> ft.Container:
-        # Círculo con iniciales, bgcolor=PRIMARY
-        ...
-```
-
-Para cambiar el tema en runtime: se modifican los atributos de clase
-(`T.PRIMARY = nuevo_color`, etc.) y se llama `page.data["on_theme_change"]()`
-que ejecuta `rebuild()` y reconstruye toda la UI con los nuevos colores.
-
----
-
-## PANEL DE CONFIGURACIÓN (components/settings_panel.py)
-
-Accesible desde Configuración (menú footer del sidebar). Secciones:
-
-**1. Paleta de colores:** `GridView` de tarjetas, cada una muestra una franja
-de 4 swatches (PRIMARY / PRIMARY_CONTAINER / SURFACE / ON_SURFACE).
-Al hacer clic aplica el tema y llama `on_theme_change` → `rebuild()`.
-Temas predefinidos: Google Blue, Teal Verde, Índigo, Navy Slate, Emerald, Rose.
-
-**2. Acerca de:** versión, motor UI, información del sistema.
-
----
-
-## ESTRUCTURA DE CADA PÁGINA
-
-Cada página es una clase con `__init__(self, page)` y `build() -> ft.Control`.
-El `build()` retorna un `Container(expand=True)` con esta estructura:
-
-```
-Column [
-  _build_header()      # Ícono grande + título + subtítulo, bgcolor=SURFACE
-  Divider
-  Container(expand, scroll=AUTO) [
-    _build_<seccion>()     # Card con contenido específico (ej: formulario)
-    _build_cards_grid()    # GridView de action cards
-    _build_log_panel()     # Panel de registro de actividad (si aplica)
-  ]
+    MenuItem(
+        key="home",
+        label="Inicio",
+        icon=ft.Icons.HOME_OUTLINED,
+        page_class="pages.home_page.HomePage"
+    ),
+    MenuItem(
+        key="seccion1",
+        label="Sección 1",
+        icon=ft.Icons.SETTINGS_OUTLINED,
+        page_class="pages.seccion1_page.Seccion1Page"
+    ),
+    # Agregar más ítems aquí
 ]
 ```
 
----
-
-## SISTEMA DE CARDS DE ACCIÓN
-
-Las acciones se declaran como lista de dicts al inicio del archivo de página:
-
-```python
-ACTIONS = [
-    {
-        "key":   "identificador",
-        "label": "Nombre de la acción",
-        "desc":  "Descripción corta (máx. 2 líneas)",
-        "icon":  ft.Icons.XXXX,
-        "fn":    lambda folder, log: logica.funcion(folder, log),
-    },
-]
-```
-
-Cada dict genera una tarjeta (`ft.Container` con `get_card_style()`):
-- Esquina superior izquierda: ícono con fondo opacidad 10% PRIMARY
-- Esquina superior derecha: `IconButton` PLAY_ARROW que ejecuta la acción
-- Título de la acción (`W_600`)
-- Descripción (`max_lines=2`, `overflow=ELLIPSIS`)
-- `on_click` en el `Container` completo (`ink=True` para efecto ripple)
-
-Las cards se disponen en:
-```python
-ft.GridView(runs_count=3, max_extent=340, child_aspect_ratio=1.6)
-```
-
-La ejecución corre en `threading.Thread(daemon=True)` para no bloquear la UI.
-El log se escribe con `self._log(msg)` que hace append de un `ft.Text`
-a un `Column` con `scroll=ScrollMode.AUTO`.
+**Para agregar página nueva:**
+1. Crear `pages/nueva_page.py`
+2. Agregar `MenuItem(...)` a `MENU_ITEMS`
+3. ¡Listo! Router lo detecta automáticamente
 
 ---
 
-## HOME PAGE (pages/home_page.py)
-
-Dashboard de resumen. Estructura:
-1. Banner de bienvenida: título + subtítulo + botón CTA que navega a la primera
-   sección funcional usando `page.data["on_navigate"]`
-2. Row de stat cards (4 tarjetas): ícono coloreado + valor numérico grande + label
-3. Sección "Actividad reciente": lista de ítems o estado vacío con
-   ícono `INBOX_OUTLINED` + texto explicativo
-
----
-
-## MODELOS (models/models.py)
-
-Dataclasses simples de dominio, sin dependencias de UI:
+## 🎯 Estructura de una Página
 
 ```python
-from dataclasses import dataclass
+import flet as ft
+from config.theme import AppTheme as T
+from logic.logger import get_logger
 
-@dataclass
-class EntidadA:
-    campo1: str
-    campo2: str
-    campo3: str
+logger = get_logger(__name__)
+
+class MiPagina:
+    def __init__(self, page: ft.Page):
+        self.page = page
+        logger.info("MiPagina inicializada")
+    
+    def build(self) -> ft.Control:
+        """Retorna el widget raíz de la página"""
+        return ft.Container(
+            content=ft.Column([
+                self._build_header(),
+                self._build_content(),
+            ]),
+            expand=True,
+        )
+    
+    def _build_header(self) -> ft.Control:
+        """Encabezado de la página"""
+        return ft.Text("Título", size=24, weight=ft.FontWeight.W_600)
+    
+    def _build_content(self) -> ft.Control:
+        """Contenido principal"""
+        return ft.Container(
+            content=ft.Column([
+                # Tu contenido aquí
+            ]),
+            expand=True,
+        )
 ```
 
 ---
 
-## COMPILAR PARA WINDOWS
+## 📡 Comunicación entre Componentes
 
-> **Importante:** `main.py` debe llamar `run_app()` **sin** el guard
-> `if __name__ == "__main__":` porque Flet importa el módulo en lugar
-> de ejecutarlo directamente.
+**Via `page.data` (bus de eventos):**
+
+```python
+# En gui.py
+page.data = {
+    "on_navigate": on_navigate,
+    "on_theme_change": rebuild,
+    "on_config_change": update_config,
+}
+
+# En una página
+def _on_button_click(self, e):
+    self.page.data["on_navigate"]("nueva_seccion")
+    self.page.data["on_theme_change"]()
+```
+
+**Ventaja:** Desacoplamiento — las páginas no se importan entre sí.
+
+---
+
+## 🧪 Logging Centralizado (logic/logger.py)
+
+```python
+import logging
+from logic.logger import get_logger
+
+logger = get_logger(__name__)
+
+# En cualquier archivo
+logger.info("Operación completada")
+logger.error(f"Error: {excepcion}")
+logger.debug("Información de debug")
+```
+
+**Características recomendadas:**
+- Logs a archivo + consola
+- Rotación automática
+- 5 niveles: DEBUG, INFO, WARNING, ERROR, CRITICAL
+- Timestamps y nombre de módulo
+
+---
+
+## 💾 Configuración Persistente (logic/config_manager.py)
+
+```python
+import json
+from pathlib import Path
+
+CONFIG_FILE = Path("config/app_config.json")
+
+def load_config() -> dict:
+    """Cargar configuración desde JSON"""
+    if CONFIG_FILE.exists():
+        with open(CONFIG_FILE) as f:
+            return json.load(f)
+    return {}
+
+def save_config(config: dict):
+    """Guardar configuración a JSON"""
+    CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(config, f, indent=2)
+```
+
+---
+
+## 🧩 Helpers Reutilizables (components/helpers.py)
+
+```python
+import flet as ft
+from config.theme import AppTheme as T
+
+def build_stat_chip(label: str, value: str) -> ft.Container:
+    """Chip genérico: etiqueta + valor"""
+    return ft.Container(
+        content=ft.Column([
+            ft.Text(label, size=9, color=T.ON_SURFACE_VARIANT),
+            ft.Text(value, size=11, weight=ft.FontWeight.W_600),
+        ]),
+        bgcolor=T.SURFACE,
+        border=ft.border.all(1, T.OUTLINE),
+        border_radius=6,
+        padding=10,
+    )
+
+def build_action_card(icon: str, label: str, description: str) -> ft.Container:
+    """Tarjeta de acción: ícono + label + descripción"""
+    return ft.Container(
+        content=ft.Column([
+            ft.Row([ft.Icon(icon, color=T.PRIMARY), ft.Text(label)]),
+            ft.Text(description, size=11, color=T.ON_SURFACE_VARIANT),
+        ]),
+        bgcolor=T.SURFACE,
+        border_radius=8,
+        padding=16,
+    )
+
+# Agregar más helpers aquí...
+```
+
+---
+
+## 🚀 Flujo de Desarrollo
+
+### 1. Setup Inicial
+```bash
+mkdir mi_app && cd mi_app
+poetry init
+poetry add flet==0.28.3
+mkdir -p src/{config,components,pages,logic,models,assets}
+touch src/main.py src/gui.py
+```
+
+### 2. Crear Estructura Base
+- Copiar archivos base: `main.py`, `gui.py`, `config/theme.py`, `config/menu_config.py`
+- Crear `pages/home_page.py`
+- Crear `logic/logger.py` y `logic/config_manager.py`
+
+### 3. Agregar Páginas Nuevas
+```python
+# Paso 1: Crear archivo
+# src/pages/nueva_page.py
+class NuevaPage:
+    def __init__(self, page): ...
+    def build(self): ...
+
+# Paso 2: Registrar en menu_config.py
+MenuItem(key="nueva", label="Nueva", page_class="pages.nueva_page.NuevaPage")
+
+# Paso 3: ¡Listo! Router lo detecta automáticamente
+```
+
+### 4. Agregar Lógica de Negocio
+```python
+# src/logic/mi_logica.py
+# ❌ NUNCA importar Flet
+# ✅ Solo librerías estándar + dependencias específicas del dominio
+
+def procesar_datos(input_data):
+    resultado = ...
+    return resultado
+```
+
+---
+
+## ✅ Checklist: Repo Listo para Usar
+
+- [ ] `src/main.py` — Entry point (sin `if __name__`)
+- [ ] `src/gui.py` — Router + layout principal
+- [ ] `config/theme.py` — AppTheme centralizado
+- [ ] `config/menu_config.py` — Menú en fuente única
+- [ ] `pages/home_page.py` — Primera página
+- [ ] `logic/logger.py` — Logging centralizado
+- [ ] `logic/config_manager.py` — Config persistente
+- [ ] `components/helpers.py` — Componentes reutilizables
+- [ ] `models/models.py` — Dataclasses de dominio
+- [ ] `pyproject.toml` — Dependencias Poetry
+- [ ] `.gitignore` — Excluir venv, logs, __pycache__
+- [ ] `README.md` — Documentación base
+
+---
+
+## 🎓 Patrones Clave a Respetar
+
+### 1. Separación de Capas
+```
+GUI (components + pages + gui.py)
+  ↓ (llama a)
+LOGIC (sin Flet, puro)
+  ↓ (usa)
+MODELS (dataclasses simples)
+```
+
+### 2. Colores Centralizados
+```python
+# ✅ SIEMPRE
+ft.Text("Hola", color=T.PRIMARY)
+
+# ❌ NUNCA
+ft.Text("Hola", color="#0b5f78")
+```
+
+### 3. Rutas de Menú en Fuente Única
+```python
+# ✅ menu_config.py es la autoridad
+MENU_ITEMS = [...]
+
+# ❌ NUNCA hardcodear rutas en pages
+```
+
+### 4. Lógica en logic/, No en Pages
+```python
+# ✅ logic/procesador.py
+def procesar(data):
+    return resultado
+
+# En página
+resultado = procesar(datos)
+
+# ❌ NUNCA
+class MiPagina:
+    def _procesar(self, data):  # ← NO
+        return resultado
+```
+
+### 5. Eventos vía page.data
+```python
+# ✅ Desacoplado
+self.page.data["on_navigate"]("seccion2")
+
+# ❌ Acoplado
+from pages.seccion2_page import Seccion2Page
+page.content = Seccion2Page(page).build()
+```
+
+### 6. Tema Modular
+```python
+# ✅ SIEMPRE importar tema
+from config.theme import AppTheme as T
+
+# ✅ Usar helpers genéricos
+from components.helpers import build_stat_chip
+
+# ❌ NUNCA crear componentes ad-hoc en páginas
+```
+
+---
+
+## 🔧 Compilación para Windows
 
 ```bash
-cd proyecto
-flet build windows src --project APPNAME --product "APPNAME" --org com.empresa
+flet build windows src \
+  --project APPNAME \
+  --product "APPNAME" \
+  --org com.empresa
 ```
 
 El `.exe` queda en `src/build/windows/APPNAME.exe`.
 
-**Para cambiar el ícono del `.exe` a nivel sistema operativo (Windows):**
-```powershell
-.\rcedit-x64.exe "src\build\windows\APPNAME.exe" --set-icon "src\assets\favicon.ico"
-```
-`rcedit` disponible en: `github.com/electron/rcedit/releases`
+---
+
+## 📚 Referencia Rápida de Archivos Clave
+
+| Archivo | Responsabilidad |
+|---------|-----------------|
+| `main.py` | Entry point |
+| `gui.py` | Orquestación + router |
+| `config/theme.py` | Tema centralizado |
+| `config/menu_config.py` | Menú (fuente única) |
+| `components/helpers.py` | Componentes genéricos |
+| `pages/*.py` | Vistas específicas |
+| `logic/*.py` | Lógica sin Flet |
+| `models/models.py` | Dataclasses |
 
 ---
 
-## PATRONES CLAVE A RESPETAR
+## 🚀 Próximas Mejoras (Roadmap)
 
-1. **Para agregar una página nueva:** solo editar `menu_config.py` + crear el archivo
-   de página. El router la detecta automáticamente.
+- [ ] Tests unitarios para `logic/`
+- [ ] Type hints completos
+- [ ] CI/CD (GitHub Actions)
+- [ ] Documentación generada (Sphinx)
 
-2. **Todos los colores vienen de `AppTheme`.** Nunca hardcodear colores en los widgets.
+---
 
-3. **La lógica de negocio vive en `logic/`**, nunca dentro de las páginas.
-   Las páginas solo llaman funciones de `logic/` y muestran resultados en el log.
+**Esta es una arquitectura de referencia reutilizable. Cópiala, adáptala y escala tus proyectos Flet profesionalmente.**
 
-4. **`page.data` es el bus de comunicación** entre `gui.py` y las páginas:
-   `{"on_navigate": callable, "on_theme_change": callable}`
-
-5. **`page.session`** se usa para persistir estado liviano entre navegaciones
-   (ej: carpeta de trabajo seleccionada por el usuario).
-
-6. **Las páginas del sistema** (`settings`, `profile`, `help`) se registran en
-   `SYSTEM_ITEMS` para que el router las conozca, pero no aparecen en el sidebar.
-   Solo son accesibles desde el footer del sidebar (menú `···`).
+Última actualización: 26 de Julio 2026

@@ -1,13 +1,10 @@
-# 📦 Guía de Helpers Visuales Reutilizables
+# 📦 Guía: Helpers Visuales Reutilizables
 
-**Archivo:** `components/helpers.py`  
-**Status:** ✅ Creado y en uso
+Componentes UI comunes centralizados en `components/helpers.py` para reducir duplicación.
 
 ---
 
 ## 🎯 Propósito
-
-Centralizar funciones de UI comunes para **reducir duplicación** y **mejorar mantenimiento**.
 
 En lugar de repetir código para chips, campos, tarjetas, etc., usar helpers genéricos reutilizables en cualquier página.
 
@@ -22,7 +19,7 @@ En lugar de repetir código para chips, campos, tarjetas, etc., usar helpers gen
 ```python
 from components.helpers import build_stat_chip
 
-# Ejemplo: mostrar estado
+# Básico
 chip = build_stat_chip("Estado", "ACTIVO")
 
 # Con ícono
@@ -33,13 +30,7 @@ chip = build_stat_chip(
 )
 ```
 
-**Reemplaza:**
-- Código repetido de chips en múltiples páginas
-- Construcciones manuales de Container + Column
-
-**Usado en:**
-- ✅ `pages/contracts_page.py` (mostrar datos del servicio)
-- Potencialmente: cualquier página que necesite chips
+**Usado en:** `pages/contracts_page.py` (datos del servicio)
 
 ---
 
@@ -58,17 +49,11 @@ text = build_status_text("Operativo", "UP", size=14)
 ```
 
 **Estados soportados:**
-```
-"ACTIVE"   → T.SUCCESS (verde)
-"UP"       → T.SUCCESS (verde)
-"CANCELED" → T.ERROR (rojo)
-"DOWN"     → T.ERROR (rojo)
-Otros      → T.ON_SURFACE_VARIANT (gris)
-```
-
-**Útil para:**
-- Mostrar estados sin if/else en la página
-- Consistencia de colores en toda la app
+- `"ACTIVE"` → verde (SUCCESS)
+- `"UP"` → verde (SUCCESS)
+- `"CANCELED"` → rojo (ERROR)
+- `"DOWN"` → rojo (ERROR)
+- Otros → gris (ON_SURFACE_VARIANT)
 
 ---
 
@@ -85,14 +70,8 @@ row = build_info_row(
     icon=ft.Icons.INSERT_DRIVE_FILE_OUTLINED
 )
 
-# Resultado:
-# 📄 Archivos:    42
+# Resultado: 📄 Archivos:    42
 ```
-
-**Casos de uso:**
-- Mostrar estadísticas (archivos, carpetas, tamaño)
-- Información de contratos
-- Detalles de servicios
 
 ---
 
@@ -103,20 +82,12 @@ row = build_info_row(
 ```python
 from components.helpers import build_divider_section
 
-controls = build_divider_section("Información del Servicio")
-# Retorna: [Text("..."), Divider(...)]
-```
+section = build_divider_section("Información del Servicio")
 
-**Patrón:**
+# Resultado:
+# Información del Servicio
+# ────────────────────────
 ```
-Información del Servicio
-─────────────────────────
-[contenido aquí]
-```
-
-**Casos de uso:**
-- Separar secciones en diálogos
-- Organizar información en paneles
 
 ---
 
@@ -136,19 +107,6 @@ card = build_action_card(
 )
 ```
 
-**Resultado:**
-```
-┌──────────────────────────────┐
-│ 📥  Descargar Facturas  [▶]  │
-│ Descarga facturas desde...   │
-└──────────────────────────────┘
-```
-
-**Casos de uso:**
-- Tarjetas de acciones en páginas
-- Grid de funciones
-- Buttons con descripción
-
 ---
 
 ### 6. `build_labeled_field(label, field, icon=None, helper_text="")`
@@ -167,75 +125,56 @@ field = build_labeled_field(
 )
 ```
 
-**Resultado:**
-```
-📁 Carpeta de descarga
-[D:\Facturas________________]
-Ruta local donde guardar archivos
-```
-
-**Casos de uso:**
-- Formularios
-- Configuración
-- Entrada de datos
-
 ---
 
-## 🔄 Antes vs Después (Ejemplo Real)
+## 🔄 Antes vs Después
 
 ### Antes (duplicación)
 
-**contracts_page.py:**
 ```python
+# contracts_page.py
 def _ref_chip(label: str, value: str) -> ft.Container:
     return ft.Container(
-        content=ft.Column(
-            [
-                ft.Text(label, size=9, color=T.ON_SURFACE_VARIANT),
-                ft.Text(value, size=11, weight=ft.FontWeight.W_600, color=T.ON_SURFACE),
-            ],
-            spacing=1, tight=True,
-        ),
+        content=ft.Column([
+            ft.Text(label, size=9, color=T.ON_SURFACE_VARIANT),
+            ft.Text(value, size=11, weight=ft.FontWeight.W_600),
+        ], spacing=1, tight=True),
         bgcolor=T.SURFACE,
         border=ft.border.all(1, T.OUTLINE),
         border_radius=6,
         padding=ft.padding.symmetric(horizontal=10, vertical=6),
     )
 
-# Uso:
+# Uso
 chip1 = _ref_chip("Agencia", "Central")
 chip2 = _ref_chip("Bandwidth", "10 MBPS")
 ```
 
 ### Después (reutilizable)
 
-**components/helpers.py:**
 ```python
+# components/helpers.py
 def build_stat_chip(label: str, value: str, icon: str | None = None) -> ft.Container:
-    # Mismo código, pero CENTRALIZADO
-    return ft.Container(...)
+    return ft.Container(...)  # Mismo código, centralizado
 
-# Uso en contracts_page.py:
+# Uso en cualquier página
 from components.helpers import build_stat_chip
 
 chip1 = build_stat_chip("Agencia", "Central")
 chip2 = build_stat_chip("Bandwidth", "10 MBPS")
-
-# Uso en otras páginas:
 chip3 = build_stat_chip("Tamaño", "234 MB", icon=ft.Icons.STORAGE_OUTLINED)
 ```
 
 **Ventajas:**
-- ✅ Menos duplicación
-- ✅ Cambios centralizados (actualizar diseño = un archivo)
-- ✅ Consistencia visual
-- ✅ Más legible
+- ✅ Menos duplicación (~50 líneas ahorradas)
+- ✅ Cambios centralizados
+- ✅ Consistencia visual garantizada
 
 ---
 
-## 📋 Checklist: Cómo usar en nuevas páginas
+## 📋 Checklist: Cómo Usar en Nuevas Páginas
 
-Cuando crees una nueva página, **antes de hacer helpers propios**, pregúntate:
+Antes de hacer helpers propios, pregúntate:
 
 - [ ] ¿Necesito un chip/badge? → Usa `build_stat_chip()`
 - [ ] ¿Necesito mostrar estado con color? → Usa `build_status_text()`
@@ -258,14 +197,12 @@ Si necesitas un helper que no existe:
        return ft.Container(...)
    ```
 
-2. **Documenta qué hace y cómo usarlo:**
+2. **Documen en docstring:**
    ```python
-   """
-   Mi componente hace esto.
+   """Mi componente hace esto.
    
    Args:
        param1: descripción
-       param2: descripción
    
    Returns:
        Control: widget resultado
@@ -275,47 +212,16 @@ Si necesitas un helper que no existe:
 3. **Usa en tu página:**
    ```python
    from components.helpers import build_mi_componente
-   
-   widget = build_mi_componente(...)
+   chip = build_mi_componente(...)
    ```
 
-4. **Agregalo a esta guía para que otros lo usen.**
-
----
-
-## 📊 Estadísticas de Impacto
-
-| Métrica | Antes | Después | Ahorro |
-|---------|-------|---------|--------|
-| Líneas duplicadas | 50+ | 0 | 50 líneas |
-| Archivos con helpers propios | 2+ | 1 | 1 archivo |
-| Puntos de cambio (diseño) | 3+ | 1 | 2 archivos |
-
----
-
-## ✅ Implementación Actual
-
-**✅ Completado:**
-- `build_stat_chip()` — extraído de `contracts_page.py`
-- `build_status_text()` — nuevo, para mapeos de estado
-- `build_info_row()` — nuevo, para información estructurada
-- `build_divider_section()` — nuevo, para secciones
-- `build_action_card()` — nuevo, para tarjetas de acción
-- `build_labeled_field()` — nuevo, para formularios
-
-**✅ Actualizado:**
-- `contracts_page.py` — ahora usa `build_stat_chip()`
-
-**⏳ Próximo:**
-- Revisar `facs_manager_page.py` por helpers duplicables
-- Actualizar otras páginas que creen chips manualmente
+4. **Agregalo a esta guía**
 
 ---
 
 ## 📚 Referencia Rápida
 
 ```python
-# Importar helpers en tu página
 from components.helpers import (
     build_stat_chip,
     build_status_text,
@@ -325,7 +231,6 @@ from components.helpers import (
     build_labeled_field,
 )
 
-# Usar en tu código
 chip = build_stat_chip("Label", "Value")
 text = build_status_text("Estado", "ACTIVE")
 row = build_info_row("Archivos", "42", icon=ft.Icons.INSERT_DRIVE_FILE_OUTLINED)
@@ -336,6 +241,4 @@ field = build_labeled_field("Carpeta", textfield, icon=ft.Icons.FOLDER_OUTLINED)
 
 ---
 
-**Generado:** 26 de Julio 2026  
-**Ubicación:** `components/helpers.py` + esta guía
-**Estado:** ✅ Listo para usar
+**Última actualización:** 26 de Julio 2026

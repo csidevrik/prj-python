@@ -1,0 +1,102 @@
+# 🚫 .gitignore — FACRET (Proyecto Específico)
+#
+# NOTA: Este .gitignore se aplica SOLO a facret/ y subdirectorios.
+# Las restricciones globales del root (prj-python/.gitignore) SIEMPRE PRIMAN.
+# Ejemplo: si root ignora *.log, facret/.gitignore NO puede forzar a incluir logs.
+
+## 🏗️ Flet Build Artifacts
+src/build/
+src/.buildozer/
+.buildozer/
+*.exe
+*.apk
+*.aab
+rcedit-x64.exe
+
+## 📝 Logs Específicos de FACRET
+logs/
+facret.log*
+*.log
+
+## ⚙️ Configuración Local del Usuario (NO compartir)
+# Archivos que cada usuario crea localmente y no deben sincronizarse
+config/app_config.json          # Config persistente usuario-específica
+config/*.local.json             # Overrides locales
+config/.local/
+
+## 🔐 Secretos y Credenciales (CRÍTICO)
+# Si necesitas credenciales, úsalas via variables de entorno, NO archivos en git
+*.key
+*.pem
+*.pfx
+*.p12
+credentials.json
+token.json
+.env.local
+.env.*.local
+secrets.json
+
+## 💾 Caché y Temporales
+.cache/
+*.tmp
+*.bak
+*.backup
+*~
+.DS_Store
+Thumbs.db
+
+## 🧪 Tests y Coverage (proyecto-específico)
+.pytest_cache/
+.coverage
+htmlcov/
+
+## IDE Específicas a facret (si solo se usa aquí)
+# Descomentar si quieres excluir IDE locales de este proyecto
+# .vscode/
+# .idea/
+# *.sublime-project
+
+## Data Caché (si generas datos que no deben versionarse)
+# data/cache/
+# data/downloads/
+# data/temp/
+
+## Poppler Cache (si lo genera)
+poppler-cache/
+.poppler-cache
+
+---
+
+## ⚠️ IMPORTANTE — Jerarquía de .gitignore
+
+Cuando haces `git push`, se aplica así:
+
+1️⃣ prj-python/.gitignore (AUTORIDAD MÁXIMA — se aplica a TODO)
+   → Ignora: __pycache__, venv/, *.log, .env, .pytest_cache/, etc.
+
+2️⃣ facret/.gitignore (REGLAS ADICIONALES — solo para facret/)
+   → Agrega: src/build/, config/*.local.json, credentials.json, etc.
+
+**NUNCA** un .gitignore subordinado puede sobrescribir restricciones del root.
+Si root ignora *.log, facret/ NO puede forzar a incluir logs específicas.
+
+---
+
+## 🎯 Reglas por Nivel
+
+### Root (prj-python/.gitignore) — Genérico, se aplica a TODOS
+- __pycache__, *.pyc
+- venv/, .env
+- .pytest_cache/
+- poetry.lock (si se decide ignorar)
+- *.log (genérico)
+
+### Proyecto (facret/.gitignore) — Específico de FACRET
+- Flet build artifacts (src/build/)
+- Configuración local usuario (config/*.local.json)
+- Credenciales/secretos específicos (*.key, credentials.json)
+- Caché del proyecto
+
+---
+
+**Última actualización:** 26 de Julio 2026
