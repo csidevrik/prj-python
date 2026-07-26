@@ -3,18 +3,21 @@ from config.theme import AppTheme as T
 from logic.contracts_loader import load_servicios_flat
 from logic.contracts_writer import update_servicio, add_evento
 from models.models import EnlaceInternet, EnlaceDatos
+from components.helpers import build_stat_chip
 
 
-# ── Helpers ────────────────────────────────────────────────────────────────────
+# ── Helpers específicos de contracts ────────────────────────────────────────────
 
 def _estado_color(estado: str) -> str:
+    """Mapea estado a color."""
     return {
-        "ACTIVE":   T.SUCCESS,
+        "ACTIVE": T.SUCCESS,
         "CANCELED": T.ERROR,
     }.get(estado, T.ON_SURFACE_VARIANT)
 
 
 def _op_color(estado_op: str) -> str:
+    """Mapea estado operativo (UP/DOWN) a color."""
     return T.SUCCESS if estado_op == "UP" else T.ERROR
 
 
@@ -38,24 +41,6 @@ def _matches(s, q: str) -> bool:
         or q in s.estado.lower()
         or q in s.bandwidth.lower()
         or q in s.isp.lower()
-    )
-
-
-def _ref_chip(label: str, value: str) -> ft.Container:
-    """Chip de solo lectura para mostrar datos del contrato en el diálogo."""
-    return ft.Container(
-        content=ft.Column(
-            [
-                ft.Text(label, size=9, color=T.ON_SURFACE_VARIANT),
-                ft.Text(value, size=11, weight=ft.FontWeight.W_600,
-                        color=T.ON_SURFACE),
-            ],
-            spacing=1, tight=True,
-        ),
-        bgcolor=T.SURFACE,
-        border=ft.border.all(1, T.OUTLINE),
-        border_radius=6,
-        padding=ft.padding.symmetric(horizontal=10, vertical=6),
     )
 
 
@@ -674,10 +659,10 @@ class ContractsPage:
                                             weight=ft.FontWeight.W_600),
                                     ft.Row(
                                         [
-                                            _ref_chip("Agencia", agencia_label),
-                                            _ref_chip("Bandwidth", svc.bandwidth),
-                                            _ref_chip("$/mes", f"${svc.valor_mensual:,.2f}"),
-                                            _ref_chip("Grupo", svc.grupo),
+                                            build_stat_chip("Agencia", agencia_label),
+                                            build_stat_chip("Bandwidth", svc.bandwidth),
+                                            build_stat_chip("$/mes", f"${svc.valor_mensual:,.2f}"),
+                                            build_stat_chip("Grupo", svc.grupo),
                                         ],
                                         wrap=True, spacing=6,
                                     ),
