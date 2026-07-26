@@ -5,6 +5,7 @@ import flet as ft
 from typing import Callable, Optional
 from config.theme import AppTheme as T
 from config.menu_config import MENU_ITEMS, flat_menu
+from logic.folder_stats import get_folder_stats, FolderStats
 
 
 # Datos del usuario — en el futuro vendrán de un modelo/sesión real
@@ -14,8 +15,9 @@ _USER_INITIALS = "CS"
 
 
 class DriveSidebarComponent:
-    def __init__(self, page: ft.Page):
+    def __init__(self, page: ft.Page, carpeta_trabajo: str = ""):
         self.page = page
+        self.carpeta_trabajo = carpeta_trabajo
         self.selected_item = "home"
         self._expanded = True
         self._sidebar_width = 280
@@ -42,10 +44,16 @@ class DriveSidebarComponent:
         )
         self._nav_column = ft.Column([], spacing=4)
 
+        # ── Storage section reference (para actualizar sin reconstruir) ────
+        self._storage_container = None
+
     # ── Build ─────────────────────────────────────────────────────────────
 
     def build(self):
         self._nav_column.controls = self._build_nav_items()
+
+        # ── Construir storage section y guardar referencia ────────────────
+        self._storage_container = self._build_storage_section()
 
         self._container = ft.Container(
             width=self._sidebar_width,
@@ -90,7 +98,7 @@ class DriveSidebarComponent:
                     ft.Container(expand=True),
                     ft.Divider(height=1, color=T.OUTLINE),
                     # ── Almacenamiento ───────────────────────────────────
-                    self._build_storage_section(),
+                    self._storage_container,
                     ft.Divider(height=1, color=T.OUTLINE),
                     # ── Footer de usuario (estilo ChatGPT) ───────────────
                     self._build_user_footer(),
@@ -136,7 +144,38 @@ class DriveSidebarComponent:
 
     # ── Storage section ───────────────────────────────────────────────────
 
+    def refresh_storage_section(self):
+        """Actualiza el storage section sin reconstruir todo el sidebar."""
+        if self._storage_container is None:
+            return
+
+        # Reconstruir el contenido
+        new_storage = self._build_storage_section()
+
+        # Reemplazar el contenido del container
+        self._storage_container.content = new_storage.content
+        self._storage_container.update()
+
     def _build_storage_section(self):
+        """
+        Muestra estadísticas de la carpeta de trabajo:
+        - Número de archivos
+        - Número de carpetas
+        - Tamaño total en MB/GB
+        """
+        stats = None
+        if self.carpeta_trabajo:
+            stats = get_folder_stats(self.carpeta_trabajo)
+
+        if stats:
+            tamanio_text = f"{stats.tamanio_str}"
+            archivos_text = f"{stats.num_archivos} archivo{'s' if stats.num_archivos != 1 else ''}"
+            carpetas_text = f"{stats.num_carpetas} carpeta{'s' if stats.num_carpetas != 1 else ''}"
+        else:
+            tamanio_text = "Sin datos"
+            archivos_text = "0 archivos"
+            carpetas_text = "0 carpetas"
+
         return ft.Container(
             content=ft.Column(
                 [
@@ -144,31 +183,57 @@ class DriveSidebarComponent:
                     ft.Container(
                         content=ft.Column(
                             [
+                                # ── Tamaño total ──
                                 ft.Row(
                                     [
                                         ft.Icon(
-                                            ft.Icons.CLOUD_OUTLINED,
+                                            ft.Icons.STORAGE_OUTLINED,
                                             size=14,
                                             color=T.ON_SURFACE_VARIANT,
                                         ),
                                         ft.Text(
-                                            "15 GB de 15 GB",
+                                            tamanio_text,
+                                            size=12,
+                                            weight=ft.FontWeight.W_600,
+                                            color=T.ON_SURFACE,
+                                        ),
+                                    ],
+                                    spacing=6,
+                                ),
+                                # ── Archivos ──
+                                ft.Row(
+                                    [
+                                        ft.Icon(
+                                            ft.Icons.INSERT_DRIVE_FILE_OUTLINED,
+                                            size=12,
+                                            color=T.ON_SURFACE_VARIANT,
+                                        ),
+                                        ft.Text(
+                                            archivos_text,
                                             size=11,
                                             color=T.ON_SURFACE_VARIANT,
                                         ),
                                     ],
                                     spacing=6,
                                 ),
-                                ft.Container(
-                                    content=ft.ProgressBar(
-                                        value=0.8,
-                                        height=3,
-                                        bgcolor=T.OUTLINE,
-                                        color=T.PRIMARY,
-                                    ),
-                                    margin=ft.margin.symmetric(vertical=6),
+                                # ── Carpetas ──
+                                ft.Row(
+                                    [
+                                        ft.Icon(
+                                            ft.Icons.FOLDER_OUTLINED,
+                                            size=12,
+                                            color=T.ON_SURFACE_VARIANT,
+                                        ),
+                                        ft.Text(
+                                            carpetas_text,
+                                            size=11,
+                                            color=T.ON_SURFACE_VARIANT,
+                                        ),
+                                    ],
+                                    spacing=6,
                                 ),
-                            ]
+                            ],
+                            spacing=6,
                         ),
                         padding=ft.padding.symmetric(horizontal=0, vertical=4),
                     ),

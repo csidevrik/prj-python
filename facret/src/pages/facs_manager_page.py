@@ -348,6 +348,12 @@ class FacsManagerPage:
             self._folder_field.value = e.path
             set_value("carpeta_trabajo", e.path)
             self._folder_field.update()
+            # Notificar para actualizar sidebar con nuevas estadísticas
+            if "on_config_change" in self.page.data:
+                self.page.data["on_config_change"]()
 
     def _on_folder_change(self, e):
         set_value("carpeta_trabajo", e.control.value)
+        # Notificar para actualizar sidebar con nuevas estadísticas
+        if "on_config_change" in self.page.data:
+            self.page.data["on_config_change"]()

@@ -8,6 +8,7 @@ from components.toolbar                      import DriveToolbarComponent
 from components.header.responsive_header     import ResponsiveDriveHeader as ResponsiveHeaderComponent
 from config.theme                            import DriveTheme
 from config.menu_config                      import ALL_ITEMS, MENU_ITEMS, LABEL_MAP
+from logic.config_manager                    import load_config
 
 
 def _load_page(page_class_path: str, flet_page: ft.Page) -> ft.Control:
@@ -75,7 +76,10 @@ def run_drive_gui():
             Se llama al iniciar y cada vez que el usuario cambia el tema."""
             page.overlay.clear()   # limpia FilePickers de páginas dinámicas
             header  = ResponsiveHeaderComponent(page)
-            sidebar = DriveSidebarComponent(page)
+            # Pasar carpeta_trabajo al sidebar para mostrar estadísticas
+            config = load_config()
+            carpeta_trabajo = config.get("carpeta_trabajo", "")
+            sidebar = DriveSidebarComponent(page, carpeta_trabajo=carpeta_trabajo)
             toolbar = DriveToolbarComponent(page, on_toggle_sidebar=sidebar._toggle_sidebar)
 
             content_area = ft.Container(
@@ -110,10 +114,22 @@ def run_drive_gui():
             page.controls.append(main_layout)
             page.update()
 
+        # Función para actualizar solo el sidebar (sin reconstruir toda la UI)
+        def update_sidebar_only():
+            """Actualiza solo el sidebar cuando cambia la carpeta de trabajo."""
+            if "sidebar" not in ctx:
+                return  # Sidebar aún no está creado
+            config = load_config()
+            new_carpeta = config.get("carpeta_trabajo", "")
+            ctx["sidebar"].carpeta_trabajo = new_carpeta
+            # Actualizar solo la sección de almacenamiento
+            ctx["sidebar"].refresh_storage_section()
+
         # Exponer callbacks a las páginas vía page.data
         page.data = {
-            "on_theme_change": rebuild,
-            "on_navigate":     on_navigate,
+            "on_theme_change":  rebuild,
+            "on_config_change": update_sidebar_only,  # Solo actualiza sidebar, no toda la UI
+            "on_navigate":      on_navigate,
         }
 
         rebuild()

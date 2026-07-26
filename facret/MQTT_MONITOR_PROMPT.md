@@ -23,18 +23,18 @@ y notificar automáticamente cuando un enlace baja.
 
 ## STACK TECNOLÓGICO
 
-| Componente | Tecnología |
-|---|---|
-| Protocolo mensajería | MQTT (paho-mqtt) |
-| Broker MQTT | Mosquitto (en VPS externo) |
-| Agente publisher externo | Python script en VPS/AWS |
-| Agente publisher interno | Python script en servidor red EMOV |
-| Subscriber / servicio | Python + pywin32 (Servicio Windows) |
-| Base de datos eventos | SQLite (eventos.db) |
-| Notificaciones email | smtplib / SMTP corporativo |
-| Integración con FACRET | Lee SQLite directamente (no suscribe MQTT) |
-| Lenguaje | Python >= 3.11 |
-| Gestión dependencias | Poetry |
+| Componente               | Tecnología                                |
+| ------------------------ | ------------------------------------------ |
+| Protocolo mensajería    | MQTT (paho-mqtt)                           |
+| Broker MQTT              | Mosquitto (en VPS externo)                 |
+| Agente publisher externo | Python script en VPS/AWS                   |
+| Agente publisher interno | Python script en servidor red EMOV         |
+| Subscriber / servicio    | Python + pywin32 (Servicio Windows)        |
+| Base de datos eventos    | SQLite (eventos.db)                        |
+| Notificaciones email     | smtplib / SMTP corporativo                 |
+| Integración con FACRET  | Lee SQLite directamente (no suscribe MQTT) |
+| Lenguaje                 | Python >= 3.11                             |
+| Gestión dependencias    | Poetry                                     |
 
 ---
 
@@ -132,6 +132,7 @@ CREATE INDEX idx_ts_inicio ON eventos_enlace(ts_inicio);
 **Topic:** `enlaces/{cod_serv}/estado`
 
 **Payload DOWN:**
+
 ```json
 {
   "op": "DOWN",
@@ -142,6 +143,7 @@ CREATE INDEX idx_ts_inicio ON eventos_enlace(ts_inicio);
 ```
 
 **Payload UP:**
+
 ```json
 {
   "op": "UP",
