@@ -1,0 +1,16 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: facret-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: facret
+      MONGO_INITDB_ROOT_PASSWORD: facret_dev
+      MONGO_INITDB_DATABASE: facret
+    volumes:
+      - facret_mongo_data:/data/db
+
+volumes:
+  facret_mongo_data:

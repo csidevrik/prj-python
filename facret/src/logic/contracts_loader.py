@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 from models.models import (
-    Agencia, Evento,
-    EnlaceInternet, EnlaceDatos,
+    Agencia, Evento, Upgrade,
+    EnlaceInternet, EnlaceDatos, EnlaceHousing,
     GrupoServicios, Contrato,
 )
 
@@ -22,31 +22,41 @@ def _parse_eventos(raw: list[dict]) -> list[Evento]:
     return [Evento(**e) for e in raw]
 
 
+def _parse_upgrade(raw: dict | None) -> Upgrade | None:
+    if not raw:
+        return None
+    return Upgrade(**raw)
+
+
 def _parse_servicio(
     raw: dict,
     agencias: dict[str, Agencia],
-) -> EnlaceInternet | EnlaceDatos:
+) -> EnlaceInternet | EnlaceDatos | EnlaceHousing:
     tipo = raw["tipo"]
     eventos = _parse_eventos(raw.get("eventos", []))
+    upgrade = _parse_upgrade(raw.get("upgrade"))
 
     if tipo == "internet":
         agencia_id = raw["agencia_id"]
         return EnlaceInternet(
-            cod_serv=raw["cod_serv"],
+            cod_serv=raw.get("cod_serv"),
             agencia_id=agencia_id,
             grupo=raw["grupo"],
             isp=raw["isp"],
             sdwan=raw["sdwan"],
+            tecnologia=raw.get("tecnologia", ""),
             bandwidth=raw["bandwidth"],
             valor_mensual=raw["valor_mensual"],
             ip_publica=raw.get("ip_publica", ""),
             estado=raw["estado"],
             estado_operativo=raw["estado_operativo"],
             dias_servicio=raw["dias_servicio"],
-            vigencia_meses=raw["vigencia_meses"],
-            fecha_inicio=raw["fecha_inicio"],
-            fecha_fin=raw["fecha_fin"],
+            vigencia_meses=raw.get("vigencia_meses"),
+            fecha_inicio=raw.get("fecha_inicio"),
+            fecha_fin=raw.get("fecha_fin"),
+            fecha_fin_real=raw.get("fecha_fin_real"),
             notas=raw.get("notas", ""),
+            upgrade=upgrade,
             eventos=eventos,
             agencia=agencias.get(agencia_id),
         )
@@ -55,25 +65,45 @@ def _parse_servicio(
         extremo_a = raw["extremo_a"]
         extremo_b = raw["extremo_b"]
         return EnlaceDatos(
-            cod_serv=raw["cod_serv"],
+            cod_serv=raw.get("cod_serv"),
             extremo_a=extremo_a,
             extremo_b=extremo_b,
             grupo=raw["grupo"],
             isp=raw["isp"],
             sdwan=raw["sdwan"],
+            tecnologia=raw.get("tecnologia", ""),
             bandwidth=raw["bandwidth"],
             valor_mensual=raw["valor_mensual"],
             ip_publica=raw.get("ip_publica", ""),
             estado=raw["estado"],
             estado_operativo=raw["estado_operativo"],
             dias_servicio=raw["dias_servicio"],
-            vigencia_meses=raw["vigencia_meses"],
-            fecha_inicio=raw["fecha_inicio"],
-            fecha_fin=raw["fecha_fin"],
+            vigencia_meses=raw.get("vigencia_meses"),
+            fecha_inicio=raw.get("fecha_inicio"),
+            fecha_fin=raw.get("fecha_fin"),
+            fecha_fin_real=raw.get("fecha_fin_real"),
             notas=raw.get("notas", ""),
+            upgrade=upgrade,
             eventos=eventos,
             agencia_extremo_a=agencias.get(extremo_a),
             agencia_extremo_b=agencias.get(extremo_b),
+        )
+
+    if tipo == "housing":
+        agencia_id = raw["agencia_id"]
+        return EnlaceHousing(
+            cod_serv=raw.get("cod_serv"),
+            agencia_id=agencia_id,
+            grupo=raw["grupo"],
+            estado=raw["estado"],
+            valor_mensual=raw.get("valor_mensual", 0.0),
+            fecha_inicio=raw.get("fecha_inicio"),
+            fecha_fin=raw.get("fecha_fin"),
+            fecha_fin_real=raw.get("fecha_fin_real"),
+            notas=raw.get("notas", ""),
+            upgrade=upgrade,
+            eventos=eventos,
+            agencia=agencias.get(agencia_id),
         )
 
     raise ValueError(f"Tipo de servicio desconocido: '{tipo}' en {raw.get('cod_serv')}")
@@ -112,6 +142,6 @@ def load_contratos() -> list[Contrato]:
     return contratos
 
 
-def load_servicios_flat() -> list[EnlaceInternet | EnlaceDatos]:
+def load_servicios_flat() -> list[EnlaceInternet | EnlaceDatos | EnlaceHousing]:
     """Retorna todos los servicios de todos los contratos en una lista plana."""
     return [s for c in load_contratos() for s in c.servicios_flat()]
