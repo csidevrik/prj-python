@@ -41,6 +41,7 @@ Ver [docs/SETUP.md](docs/SETUP.md) para más detalles.
 | **[CHANGELOG.md](CHANGELOG.md)** | Ver historial de cambios y features |
 | **[CONTRIBUTING.md](CONTRIBUTING.md)** | Contribuir al proyecto |
 | **[docs/GUIDES/](docs/GUIDES/)** | Guías de desarrollo (logging, helpers, etc.) |
+| **[docs/GUIDES/CONTRATOS_ETAPA_MONGO.md](docs/GUIDES/CONTRATOS_ETAPA_MONGO.md)** | Modelo de contratos/servicios e incidentes en MongoDB |
 | **[docs/ANALYSIS/](docs/ANALYSIS/)** | Análisis técnicos (modularidad, arquitectura) |
 | **[docs/ROADMAP/](docs/ROADMAP/)** | Futuro del proyecto (MQTT monitoring, etc.) |
 
