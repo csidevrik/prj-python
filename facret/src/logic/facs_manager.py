@@ -176,7 +176,8 @@ def extract_fac_register(xml_file_path: str) -> Factura:
     codigo = root.find('.//campoAdicional[@nombre="Instalacion"]').text
     numero = build_numero_factura(estab, pto_em, secue)
     valor  = root.find(".//totalSinImpuestos").text
-    return Factura(code_inst=codigo, number_fac=numero, value_serv=valor)
+    fech_emi  = root.find(".//fechaEmision").text
+    return Factura(code_inst=codigo, number_fac=numero, value_serv=valor, fecha_emision=fech_emi)
 
 def get_register_xml_retencion(xml_file_path: str) -> Retencion:
     with open(xml_file_path, "r", encoding="utf-8") as f:
@@ -218,6 +219,8 @@ def process_all_xml_facs(folder: str, log_fn: LogFn = None) -> int:
                 "code_inst":  r.code_inst,
                 "number_fac": r.number_fac,
                 "value_serv": r.value_serv,
+                "fecha_emision":   r.fecha_emision,
+                "name_original": filename,
             })
         except Exception as e:
             _log(f"  Error en {filename}: {e}", log_fn)

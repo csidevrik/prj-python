@@ -41,6 +41,12 @@ Todos los cambios notables en este proyecto se documentarán en este archivo.
   - Archivos Markdown organizados en `docs/`
   - CONTRIBUTING.md para guía de desarrollo
   - ARCHITECTURE.md para visión técnica
+- **Auditoría de Facturas Mejorada** — `facs_manager.py` (Octubre 2026)
+  - Extrae `fechaEmision` del XML de cada factura
+  - Registra `archivo_original` (nombre en el correo vs. nombre real)
+  - CSV now incluye 5 columnas: code_inst, number_fac, value_serv, fecha_emision, archivo_original
+  - Resuelve problema: ETAPA EP envía archivos con nombres incorrectos
+  - Orden de operaciones: procesar XMLs ANTES de renombrar (preserva nombres originales)
 
 ### Documentation 📚
 - `GUIA_LOGGING.md` — Cómo usar el sistema de logging

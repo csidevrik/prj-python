@@ -192,4 +192,36 @@ Ver [docs/ROADMAP/](../ROADMAP/) para futuras funcionalidades:
 
 ---
 
-**Última actualización:** 26 de Julio 2026
+### Auditoría Mejorada en Procesamiento de Facturas ⭐ NEW (Oct 2026)
+
+**Qué:** Captura `fechaEmision` y `archivo_original` en CSV para auditoría de discrepancias ETAPA EP
+
+**Dónde:**
+- Implementación: `src/logic/facs_manager.py`
+- Modelos: `src/models/models.py` (clase `Factura`)
+
+**Problema resuelto:**
+ETAPA EP envía archivos XML/PDF con nombres incorrectos en correos vs. contenido real:
+- Recibido: `FAC065173799_001.xml` ❌
+- Contenido real: `FAC001003055432769` ✅
+
+**Solución:**
+1. Extrae `<fechaEmision>` de cada XML
+2. Registra `archivo_original` (nombre con que llegó)
+3. CSV ahora tiene 5 columnas: code_inst, number_fac, value_serv, fecha_emision, archivo_original
+
+**Ejemplo resultado:**
+```csv
+I0247958,FAC001003055432769,328.32,02/10/2026,FAC065173799_001.xml
+I0247954,FAC001003055362149,51.8,01/10/2026,FAC001003055362149.xml
+```
+
+**Orden de operaciones importante:**
+```
+1. process_all_xml_facs()           ← Captura nombres originales
+2. rename_files_with_attributes()   ← Renombra después
+```
+
+---
+
+**Última actualización:** 05 de Octubre 2026

@@ -183,11 +183,59 @@ Si también quieres **renombrar los PDFs para incluir el verdadero número:**
 
 Esto requeriría función adicional `get_corrected_filename()` y procesar PDFs después de generar CSV. **Más complejo pero filesystem más claro.**
 
-### Decisión Pendiente
-**¿Implementar OPCIÓN A, B, o ambas?** Espera aprobación explícita antes de escribir código.
+### Implementación: OPCIÓN A ✅ (Octubre 2026)
+
+**Estado: COMPLETADO**
+
+Cambios realizados:
+
+1. ✅ **models.py** — Actualizar clase `Factura`:
+   ```python
+   class Factura:
+       def __init__(self, code_inst, number_fac, value_serv, fecha_emision):
+           self.fecha_emision = fecha_emision
+   ```
+
+2. ✅ **facs_manager.py línea 179-180** — Extraer `fechaEmision`:
+   ```python
+   fech_emi = root.find(".//fechaEmision").text
+   return Factura(code_inst=codigo, number_fac=numero, value_serv=valor, fecha_emision=fech_emi)
+   ```
+
+3. ✅ **facs_manager.py línea 218-223** — Agregar a registros:
+   ```python
+   registros.append({
+       "code_inst": r.code_inst,
+       "number_fac": r.number_fac,
+       "value_serv": r.value_serv,
+       "fecha_emision": r.fecha_emision,
+       "archivo_original": filename,
+   })
+   ```
+
+### Problema Resuelto: Orden de Operaciones
+
+**Dilema:** Si se renombraba antes de procesar, se perdía el `archivo_original`.
+
+**Solución:** Llamar `process_all_xml_facs()` ANTES de `rename_files_with_attributes()`:
+```
+1. process_all_xml_facs()           ← Captura archivo_original CON nombre actual
+2. rename_files_with_attributes()   ← Renombra después (ya está en CSV)
+```
+
+**Resultado CSV:**
+- Columnas: code_inst, number_fac, value_serv, fecha_emision, archivo_original
+- Ejemplo: I0247958 | FAC001003055432769 | 328.32 | 02/10/2026 | FAC065173799_001.xml
+- ✅ Auditoría clara de discrepancias ETAPA EP
+
+### Próximas Mejoras (Backlog)
+
+- [ ] OPCIÓN B: Renombrar PDFs con nomenclatura extendida (si se necesita)
+- [ ] Validación: Manejar campos faltantes `.//numDocSustento` en XMLs de retención
+- [ ] Nota IDE: XPath `.//numDocSustento` en línea 191 marca falso positivo cuando XML abierto es de facturas (no retenciones)
 
 ### Referencias
 - Análisis visual: `https://claude.ai/artifact/HnotUF9XBFZYfxhVPBbXFK`
-- Archivo: `facret/src/logic/facs_manager.py` (281 líneas)
-- Modelo: `facret/src/models/models.py` (donde está dataclass Factura)
-- Fecha análisis: 2026-10-03
+- Archivo: `facret/src/logic/facs_manager.py` (283 líneas)
+- Modelo: `facret/src/models/models.py` (clase Factura)
+- Fecha implementación: 2026-10-05
