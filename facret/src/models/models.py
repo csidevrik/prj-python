@@ -14,6 +14,16 @@ class Retencion:
         self.ret_value = ret_value
         self.fac_number = fac_number
 
+class NotaCredito:
+    def __init__(self, code_inst, number_noc, value_noc, fecha_emision,
+                 fac_original, fecha_fac_original, motivo):
+        self.code_inst = code_inst
+        self.number_noc = number_noc
+        self.value_noc = value_noc
+        self.fecha_emision = fecha_emision
+        self.fac_original = fac_original
+        self.fecha_fac_original = fecha_fac_original
+        self.motivo = motivo
 
 # ---------------------------------------------------------------------------
 # Contratos ETAPA

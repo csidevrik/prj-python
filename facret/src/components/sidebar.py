@@ -179,7 +179,20 @@ class DriveSidebarComponent:
         return ft.Container(
             content=ft.Column(
                 [
-                    ft.Text("Almacenamiento", size=13, color=T.ON_SURFACE_VARIANT),
+                    ft.Row(
+                        [
+                            ft.Text("Almacenamiento", size=13, color=T.ON_SURFACE_VARIANT),
+                            ft.IconButton(
+                                icon=ft.Icons.REFRESH,
+                                icon_size=14,
+                                icon_color=T.ON_SURFACE_VARIANT,
+                                tooltip="Actualizar almacenamiento",
+                                on_click=lambda e: self.refresh_storage_section(),
+                            ),
+                        ],
+                        spacing=4,
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    ),
                     ft.Container(
                         content=ft.Column(
                             [
