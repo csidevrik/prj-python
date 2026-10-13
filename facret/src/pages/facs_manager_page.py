@@ -5,7 +5,7 @@ import flet as ft
 import threading
 from config.theme import AppTheme as T
 from logic import facs_manager as fm
-from logic.config_manager import load_config, set_value
+from logic.config_manager import load_config
 
 
 # ── Definición de acciones ─────────────────────────────────────────────────────
@@ -67,19 +67,6 @@ class FacsManagerPage:
     def __init__(self, page: ft.Page):
         self.page = page
         self._running = False
-
-        # ── Folder picker ──────────────────────────────────────────────────
-        self._folder_field = ft.TextField(
-            value=load_config().get("carpeta_trabajo", ""),
-            hint_text="Selecciona o escribe la ruta de la carpeta...",
-            border_color=T.OUTLINE,
-            focused_border_color=T.PRIMARY,
-            text_size=13,
-            expand=True,
-            on_change=self._on_folder_change,
-        )
-        self._picker = ft.FilePicker(on_result=self._on_picker_result)
-        page.overlay.append(self._picker)
 
         # ── Log ────────────────────────────────────────────────────────────
         self._log_col = ft.Column(
@@ -165,32 +152,9 @@ class FacsManagerPage:
                         color=T.ON_SURFACE,
                     ),
                     ft.Text(
-                        "Todas las acciones operan sobre esta carpeta.",
+                        "Usa el selector de carpeta en la barra superior para cambiar la carpeta de trabajo.",
                         size=12,
                         color=T.ON_SURFACE_VARIANT,
-                    ),
-                    ft.Container(height=8),
-                    ft.Row(
-                        [
-                            self._folder_field,
-                            ft.ElevatedButton(
-                                content=ft.Row(
-                                    [
-                                        ft.Icon(ft.Icons.FOLDER_OPEN_OUTLINED, size=16, color=T.ON_PRIMARY),
-                                        ft.Text("Explorar", size=13, color=T.ON_PRIMARY),
-                                    ],
-                                    spacing=6,
-                                    tight=True,
-                                ),
-                                style=ft.ButtonStyle(
-                                    bgcolor=T.PRIMARY,
-                                    shape=ft.RoundedRectangleBorder(radius=8),
-                                    padding=ft.padding.symmetric(horizontal=16, vertical=10),
-                                ),
-                                on_click=lambda e: self._picker.get_directory_path(),
-                            ),
-                        ],
-                        spacing=10,
                     ),
                 ],
                 spacing=4,
@@ -301,9 +265,9 @@ class FacsManagerPage:
     # ── Action execution ───────────────────────────────────────────────────
 
     def _run_action(self, action: dict):
-        folder = self._folder_field.value.strip()
+        folder = load_config().get("carpeta_trabajo", "").strip()
         if not folder:
-            self._log("Selecciona una carpeta de trabajo antes de ejecutar.")
+            self._log("Selecciona una carpeta de trabajo desde el panel superior.")
             return
         if self._running:
             self._log("Hay una accion en curso. Espera a que termine.")
@@ -340,20 +304,3 @@ class FacsManagerPage:
     def _clear_log(self, e):
         self._log_col.controls.clear()
         self._log_col.update()
-
-    # ── Folder picker callbacks ─────────────────────────────────────────────
-
-    def _on_picker_result(self, e: ft.FilePickerResultEvent):
-        if e.path:
-            self._folder_field.value = e.path
-            set_value("carpeta_trabajo", e.path)
-            self._folder_field.update()
-            # Notificar para actualizar sidebar con nuevas estadísticas
-            if "on_config_change" in self.page.data:
-                self.page.data["on_config_change"]()
-
-    def _on_folder_change(self, e):
-        set_value("carpeta_trabajo", e.control.value)
-        # Notificar para actualizar sidebar con nuevas estadísticas
-        if "on_config_change" in self.page.data:
-            self.page.data["on_config_change"]()

@@ -33,17 +33,6 @@ class FacsDownloaderPage:
             text_size=13,
             expand=True,
         )
-        self._tf_guardar = ft.TextField(
-            value=self._config.get("carpeta_guardar", ""),
-            border_color=DriveTheme.GREY_200,
-            focused_border_color=DriveTheme.PRIMARY_BLUE,
-            text_size=13,
-            expand=True,
-        )
-
-        # ── File Picker para seleccionar carpeta de descarga ──────────────
-        self._picker = ft.FilePicker(on_result=self._on_picker_result)
-        page.overlay.append(self._picker)
 
         self._log_column = ft.Column(
             controls=[],
@@ -119,7 +108,6 @@ class FacsDownloaderPage:
                 self._build_field("Carpeta de Outlook",              "Ej: Inbox\\CONTRACT\\ETAPA\\FACS", ft.Icons.FOLDER_OUTLINED,  self._tf_outlook),
                 self._build_field("Correo del remitente (From)",     "Ej: info@comunicados-etapa.com",   ft.Icons.ALTERNATE_EMAIL,   self._tf_remitente),
                 self._build_field("Correo del destinatario (To)",    "Ej: csigua@emov.gob.ec",           ft.Icons.PERSON_OUTLINE,    self._tf_destinatario),
-                self._build_field_with_picker("Carpeta de descarga local", "Ej: D:\\Facturas_ETAPA", ft.Icons.SAVE_ALT, self._tf_guardar),
             ], spacing=0),
             **DriveTheme.get_card_style(),
             padding=20,
@@ -133,29 +121,6 @@ class FacsDownloaderPage:
                 ft.Column([
                     ft.Text(label, size=11, color=DriveTheme.GREY_600, weight=ft.FontWeight.W_500),
                     field,
-                ], spacing=2, expand=True),
-            ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.START),
-            padding=ft.padding.only(bottom=16),
-        )
-
-    def _build_field_with_picker(self, label: str, hint: str, icon, field: ft.TextField):
-        """Campo con botón Explorar para seleccionar carpeta."""
-        field.hint_text = hint
-        return ft.Container(
-            content=ft.Row([
-                ft.Container(content=ft.Icon(icon, size=18, color=DriveTheme.GREY_600), width=36),
-                ft.Column([
-                    ft.Text(label, size=11, color=DriveTheme.GREY_600, weight=ft.FontWeight.W_500),
-                    ft.Row([
-                        field,
-                        ft.IconButton(
-                            icon=ft.Icons.FOLDER_OPEN_OUTLINED,
-                            icon_size=18,
-                            icon_color=DriveTheme.PRIMARY_BLUE,
-                            tooltip="Explorar carpeta",
-                            on_click=self._on_browse_click,
-                        ),
-                    ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.CENTER),
                 ], spacing=2, expand=True),
             ], spacing=8, vertical_alignment=ft.CrossAxisAlignment.START),
             padding=ft.padding.only(bottom=16),
@@ -202,23 +167,11 @@ class FacsDownloaderPage:
 
     # ── Logic ────────────────────────────────────────────────────────────────
 
-    def _on_browse_click(self, e):
-        """Abre el dialogo de selección de carpeta."""
-        self._picker.get_directory_path()
-
-    def _on_picker_result(self, e: ft.FilePickerResultEvent):
-        """Maneja la selección de carpeta desde el File Picker."""
-        if e.path:
-            self._tf_guardar.value = e.path
-            self._tf_guardar.update()
-
     def _save_config(self, e):
         data = {
             "carpeta_outlook":     self._tf_outlook.value,
             "correo_remitente":    self._tf_remitente.value,
             "correo_destinatario": self._tf_destinatario.value,
-            "carpeta_guardar":     self._tf_guardar.value,
-            "carpeta_trabajo":     self._tf_guardar.value,  # Sincronizar con Gestión FACS
         }
         save_config(data)
         self._log("Configuracion guardada correctamente.")
@@ -238,9 +191,13 @@ class FacsDownloaderPage:
         try:
             from logic.facs_downloader import DescargadorFacturas
             descargador = DescargadorFacturas(log_callback=self._log)
+            carpeta_guardar = load_config().get("carpeta_trabajo", "")
+            if not carpeta_guardar.strip():
+                self._log("Error: Selecciona una carpeta de trabajo desde el panel superior.")
+                return
             descargador.descargar_facturas_etapa(
                 carpeta_outlook=self._tf_outlook.value,
-                carpeta_guardar=self._tf_guardar.value,
+                carpeta_guardar=carpeta_guardar,
                 correo_remitente=self._tf_remitente.value,
             )
         except Exception as ex:

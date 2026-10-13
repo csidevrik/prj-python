@@ -5,6 +5,7 @@ import importlib
 import flet as ft
 from components.sidebar                      import DriveSidebarComponent
 from components.toolbar                      import DriveToolbarComponent
+from components.working_folder_panel         import WorkingFolderPanel
 from components.header.responsive_header     import ResponsiveDriveHeader as ResponsiveHeaderComponent
 from config.theme                            import DriveTheme
 from config.menu_config                      import ALL_ITEMS, MENU_ITEMS, LABEL_MAP
@@ -81,6 +82,7 @@ def run_drive_gui():
             carpeta_trabajo = config.get("carpeta_trabajo", "")
             sidebar = DriveSidebarComponent(page, carpeta_trabajo=carpeta_trabajo)
             toolbar = DriveToolbarComponent(page, on_toggle_sidebar=sidebar._toggle_sidebar)
+            working_folder = WorkingFolderPanel(page)
 
             content_area = ft.Container(
                 content=_load_page("pages.home_page.HomePage", page),
@@ -88,10 +90,11 @@ def run_drive_gui():
                 bgcolor=ft.Colors.GREY_50,
             )
 
-            ctx["header"]       = header
-            ctx["sidebar"]      = sidebar
-            ctx["toolbar"]      = toolbar
-            ctx["content_area"] = content_area
+            ctx["header"]          = header
+            ctx["sidebar"]         = sidebar
+            ctx["toolbar"]         = toolbar
+            ctx["working_folder"]  = working_folder
+            ctx["content_area"]    = content_area
 
             sidebar.on_nav_change = on_navigate
             header.on_navigate    = on_navigate
@@ -100,6 +103,7 @@ def run_drive_gui():
                 [
                     header.build(),
                     toolbar.build(),
+                    working_folder.build(),
                     ft.Row(
                         [sidebar.build(), content_area],
                         spacing=0,
@@ -114,16 +118,19 @@ def run_drive_gui():
             page.controls.append(main_layout)
             page.update()
 
-        # Función para actualizar solo el sidebar (sin reconstruir toda la UI)
+        # Función para actualizar solo el sidebar y panel (sin reconstruir toda la UI)
         def update_sidebar_only():
-            """Actualiza solo el sidebar cuando cambia la carpeta de trabajo."""
+            """Actualiza sidebar y panel de carpeta cuando cambia la carpeta de trabajo."""
             if "sidebar" not in ctx:
-                return  # Sidebar aún no está creado
+                return  # Componentes aún no están creados
             config = load_config()
             new_carpeta = config.get("carpeta_trabajo", "")
             ctx["sidebar"].carpeta_trabajo = new_carpeta
-            # Actualizar solo la sección de almacenamiento
+            # Actualizar solo la sección de almacenamiento del sidebar
             ctx["sidebar"].refresh_storage_section()
+            # Actualizar el panel de carpeta de trabajo
+            if "working_folder" in ctx:
+                ctx["working_folder"].update()
 
         # Exponer callbacks a las páginas vía page.data
         page.data = {
