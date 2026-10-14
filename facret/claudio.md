@@ -20,6 +20,31 @@ Claude debe **explicar qué va a hacer y por qué**, y esperar un **"sí" explí
 
 ---
 
+## Protocolo de Cambios: Documentación Previa
+
+Antes de iniciar trabajo significativo:
+
+1. **Actualizar `CHANGELOG.md`** con:
+   - Qué se va a implementar (sección "### En Progreso")
+   - Pasos principales del trabajo
+   
+2. **Ejecutar los cambios** en código:
+   - Una vez documentado, proceder con implementación
+   - Seguir reglas de autorización según corresponda
+   
+3. **Finalizar en `CHANGELOG.md`:**
+   - Mover a "### Completado" 
+   - Agregar detalles de qué se logró
+   - Enumerar bugs corregidos (si aplica)
+   
+4. **Commit con referencia:**
+   - Mensaje de commit incluye detalles de lo que se hizo
+   - Referencia a CHANGELOG.md si es necesario
+
+**Motivo:** Mantiene documentación y código sincronizados. Facilita rastrear qué se hizo, cuándo y por qué.
+
+---
+
 ## Análisis y Decisiones: Gestión de Infraestructura (Septiembre 2026)
 
 ### Contexto
