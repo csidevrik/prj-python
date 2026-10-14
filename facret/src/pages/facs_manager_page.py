@@ -48,10 +48,10 @@ ACTIONS = [
     },
     {
         "key":   "proc_fac",
-        "label": "Procesar facturas XML",
-        "desc":  "Lee todos los XMLs de facturas y genera facturas.json + facturas.csv ordenados por código.",
+        "label": "Procesar documentos XML",
+        "desc":  "Detecta y procesa facturas + notas de crédito de ETAPA EP. Genera JSON + CSV ordenados por código.",
         "icon":  ft.Icons.RECEIPT_LONG_OUTLINED,
-        "fn":    lambda folder, log: fm.process_all_xml_facs(folder, log),
+        "fn":    lambda folder, log: fm.process_all_xml_documents(folder, log),
     },
     {
         "key":   "proc_ret",

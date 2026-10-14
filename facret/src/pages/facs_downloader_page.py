@@ -168,12 +168,13 @@ class FacsDownloaderPage:
     # ── Logic ────────────────────────────────────────────────────────────────
 
     def _save_config(self, e):
-        data = {
+        config = load_config()  # Cargar config existente (incluyendo carpeta_trabajo)
+        config.update({
             "carpeta_outlook":     self._tf_outlook.value,
             "correo_remitente":    self._tf_remitente.value,
             "correo_destinatario": self._tf_destinatario.value,
-        }
-        save_config(data)
+        })
+        save_config(config)  # Guardar merge
         self._log("Configuracion guardada correctamente.")
 
         # Notificar a gui.py para reconstruir sidebar con nuevas estadísticas
