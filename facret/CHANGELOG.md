@@ -6,6 +6,20 @@ Todos los cambios notables en este proyecto se documentarán en este archivo.
 
 ## [Unreleased]
 
+### En Progreso 🚧
+- **Mejora de Mensajes de Error** (Octubre 2026)
+  - Mejorar docstrings en métodos críticos
+  - Agregar detalles de parámetros, retorno, excepciones
+  - Enriquecer mensajes de error con contexto
+  - Ejemplo: `detect_document_type_etapa()` → docstring + error messages mejorados
+  
+- **Paso 6: Mejorar `rename_files_with_attributes()` para NC y Retenciones**
+  - Actualmente: solo renombra facturas (formato: `FAC{estab}{ptoEmi}{secue}-{codigo}`)
+  - Mejora: detectar tipo (factura/NC/retención) y aplicar nomenclatura específica
+  - NC: `NOC{estab}{ptoEmi}{secue}-{codigo_inst}`
+  - RET: `RET{estab}{ptoEmi}{secue}` (retenciones no tienen código de instalación)
+  - Beneficio: archivos organizados y fáciles de auditar por tipo
+
 ### Features ✨
 - **Logging Profesional** — Sistema centralizado con 5 niveles (DEBUG, INFO, WARNING, ERROR, CRITICAL)
   - Logs a archivo (`logs/facret.log`) + consola con colores

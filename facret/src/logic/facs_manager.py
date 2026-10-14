@@ -172,20 +172,44 @@ def rename_files_with_attributes(folder: str, log_fn: LogFn = None):
 # ── Detección de tipo de documento (ETAPA EP) ─────────────────────────────────
 
 def detect_document_type_etapa(xml_file_path: str) -> str:
-    """Detecta si un XML de ETAPA EP es FACTURA o NOTA_CREDITO.
-    Retorna: 'factura' o 'notaCredito'. Lanza excepción si no se puede determinar.
+    """Detecta el tipo de documento XML de ETAPA EP.
+
+    Analiza el campo <codDoc> para determinar si es factura o nota de crédito.
+
+    Args:
+        xml_file_path (str): Ruta del archivo XML a analizar.
+
+    Returns:
+        str: "factura" (codDoc=01) o "notaCredito" (codDoc=04).
+
+    Raises:
+        ValueError: Si el XML no tiene codDoc válido, la ruta no existe,
+                   o no se puede parsear el archivo.
+
+    Ejemplo:
+        >>> tipo = detect_document_type_etapa("FAC001003000404284.xml")
+        >>> print(tipo)
+        'factura'
     """
     try:
         root = extract_xml_fragment(xml_file_path, "<infoTributaria>", "</infoAdicional>")
         cod_doc = root.find(".//codDoc").text
+
         if cod_doc == "01":
             return "factura"
         elif cod_doc == "04":
             return "notaCredito"
         else:
-            raise ValueError(f"Tipo de documento desconocido: codDoc={cod_doc}")
+            raise ValueError(
+                f"Tipo de documento no soportado en {xml_file_path}: codDoc={cod_doc} "
+                f"(solo 01=Factura y 04=NotaCredito son válidos)"
+            )
+    except ValueError as e:
+        raise ValueError(f"Error de validación en {xml_file_path}: {e}")
     except Exception as e:
-        raise ValueError(f"No se pudo detectar tipo en {xml_file_path}: {e}")
+        raise ValueError(
+            f"Error al parsear XML {xml_file_path}: {type(e).__name__}: {e}"
+        )
 
 
 # ── Extracción XML → modelos ──────────────────────────────────────────────────
