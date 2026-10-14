@@ -7,12 +7,6 @@ Todos los cambios notables en este proyecto se documentarán en este archivo.
 ## [Unreleased]
 
 ### En Progreso 🚧
-- **Mejora de Mensajes de Error** (Octubre 2026)
-  - Mejorar docstrings en métodos críticos
-  - Agregar detalles de parámetros, retorno, excepciones
-  - Enriquecer mensajes de error con contexto
-  - Ejemplo: `detect_document_type_etapa()` → docstring + error messages mejorados
-  
 - **Paso 6: Mejorar `rename_files_with_attributes()` para NC y Retenciones**
   - Actualmente: solo renombra facturas (formato: `FAC{estab}{ptoEmi}{secue}-{codigo}`)
   - Mejora: detectar tipo (factura/NC/retención) y aplicar nomenclatura específica
@@ -42,6 +36,14 @@ Todos los cambios notables en este proyecto se documentarán en este archivo.
   - Cálculo recursivo con `logic/folder_stats.py`
   - Se actualiza al guardar configuración
   - Formatea MB/GB automáticamente
+
+### Completado ✅
+- **Mejora de Docstrings: `detect_document_type_etapa()`** (14/10/2026)
+  - ✅ Expandido docstring con parámetros, retorno, excepciones y ejemplo
+  - ✅ Enriquecido mensajes de error con contexto específico
+  - ✅ Separado manejo de ValueError (validación) vs Exception (parseo)
+  - ✅ Mensajes ahora indican qué codDoc es válido (01, 04)
+  - Beneficio: Mejor debugging y documentación profesional
 
 ### Improvements 🔧
 - **Reducción de Duplicación** — ~50 líneas de código eliminadas
