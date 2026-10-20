@@ -264,3 +264,67 @@ Cambios realizados:
 - Archivo: `facret/src/logic/facs_manager.py` (283 líneas)
 - Modelo: `facret/src/models/models.py` (clase Factura)
 - Fecha implementación: 2026-10-05
+
+---
+
+## Estrategia: Compartir Archivos Excel (Octubre 2026)
+
+### Problema
+Usuario tiene un archivo Excel ("tabla de verdad") con:
+- Datos de presupuestos y fórmulas
+- Estructura de ubicaciones, servicios, períodos de contrato
+- Cálculos de presupuesto prorrateado para 2026
+
+Claude Code (este agente) **no puede procesar archivos `.xlsx` directamente**. Necesitamos una estrategia para extraer y compartir la estructura.
+
+### Solución Propuesta
+
+**Opción A (RECOMENDADA): Usar claude.ai/chat**
+
+1. Ir a [claude.ai/chat](https://claude.ai/chat)
+2. Copiar y pegar este prompt:
+   ```
+   Tengo un archivo Excel con datos de presupuestos que necesito compartir 
+   con un agente de desarrollo.
+   
+   El archivo contiene:
+   - Ubicaciones con códigos de instalación
+   - Servicios con rangos de fechas y valores mensuales
+   - Períodos de contrato (ETAPA-RE1, ETAPA-RE2)
+   - Cálculos de presupuestos prorrateados para 2026
+   
+   Extrae la estructura en CSV o JSON preservando:
+   - Todas las columnas
+   - Las fórmulas o lógica de cálculo (en comentarios si es necesario)
+   - Valores numéricos correctos
+   ```
+3. Subir el Excel al chat
+4. Copiar la salida (CSV o JSON) y compartirla aquí
+
+**Opción B: Exportar manualmente a CSV**
+
+1. Abrir Excel
+2. Guardar cada hoja como `.csv` (archivo → guardar como)
+3. Compartir los CSVs en el chat o pegar contenido aquí
+
+**Opción C: Copiar/pegar directo**
+
+1. Seleccionar tabla en Excel
+2. Copiar (Ctrl+C)
+3. Pegar aquí en el chat
+4. Describir columnas y significado
+
+### Beneficios
+
+- ✅ Preserva fórmulas y lógica
+- ✅ Estructura clara en JSON/CSV
+- ✅ Se puede versionear en Git
+- ✅ Facilita revisión en otra PC
+
+### Próximo Paso
+**Cuando tengas la estructura extraída, avísame y procedeamos a:**
+1. Diseñar JSON schemas para `ubicaciones.json`, `servicios.json`, `periodos.json`
+2. Implementar lógica de cálculo de presupuestos
+3. Integrar en FACRET
+
+**Fecha propuesta:** 2026-10-19

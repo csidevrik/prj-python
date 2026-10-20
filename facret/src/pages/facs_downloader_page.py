@@ -206,7 +206,10 @@ class FacsDownloaderPage:
         finally:
             pythoncom.CoUninitialize()
             self._run_btn.disabled = False
-            self._run_btn.update()
+            try:
+                self.page.update()
+            except Exception:
+                pass
 
     def _log(self, msg: str):
         self._log_column.controls.append(

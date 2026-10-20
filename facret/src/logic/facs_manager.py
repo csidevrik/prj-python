@@ -138,13 +138,39 @@ def extract_xml_fragment(file_path: str, start_limit: str, end_limit: str):
 def build_numero_factura(estab: str, pto_em: str, secue: str) -> str:
     return f"FAC{estab}{pto_em}{secue}"
 
+def build_numero_noc(estab: str, pto_em: str, secue: str) -> str:
+    return f"NOC{estab}{pto_em}{secue}"
+
+def build_numero_ret(estab: str, pto_em: str, secue: str) -> str:
+    return f"RET{estab}{pto_em}{secue}"
+
 def build_filename_from_xml(file_path: str) -> str:
+    """Construye nombre de archivo para FACTURA."""
     root   = extract_xml_fragment(file_path, "<infoTributaria>", "</infoAdicional>")
     estab  = root.find(".//estab").text
     pto_em = root.find(".//ptoEmi").text
     secue  = root.find(".//secuencial").text
     codigo = root.find('.//campoAdicional[@nombre="Instalacion"]').text
     return f"{build_numero_factura(estab, pto_em, secue)}-{codigo}"
+
+def build_noc_filename_from_xml(file_path: str) -> str:
+    """Construye nombre de archivo para NOTA DE CRÉDITO."""
+    root   = extract_xml_fragment(file_path, "<infoTributaria>", "</infoAdicional>")
+    estab  = root.find(".//estab").text
+    pto_em = root.find(".//ptoEmi").text
+    secue  = root.find(".//secuencial").text
+    codigo = root.find('.//campoAdicional[@nombre="Instalacion"]').text
+    return f"{build_numero_noc(estab, pto_em, secue)}-{codigo}"
+
+def build_ret_filename_from_xml(file_path: str) -> str:
+    """Construye nombre de archivo para RETENCIÓN (sin código de instalación)."""
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    root = ET.fromstring(content)
+    estab  = root.find(".//estab").text
+    pto_em = root.find(".//ptoEmi").text
+    secue  = root.find(".//secuencial").text
+    return build_numero_ret(estab, pto_em, secue)
 
 def rename_file_pair(folder: str, old_name: str, new_name: str):
     os.rename(
@@ -157,11 +183,29 @@ def rename_file_pair(folder: str, old_name: str, new_name: str):
     )
 
 def rename_files_with_attributes(folder: str, log_fn: LogFn = None):
-    """Renombra pares XML+PDF usando los atributos del XML como nuevo nombre."""
+    """Renombra pares XML+PDF detectando tipo (factura/NC/retención) y aplicando nomenclatura específica.
+
+    Nomenclatura:
+    - Factura:       FAC{estab}{ptoEmi}{secue}-{codigo}
+    - Nota Crédito:  NOC{estab}{ptoEmi}{secue}-{codigo}
+    - Retención:     RET{estab}{ptoEmi}{secue}
+    """
     count = 0
     for xml_file in get_files_extension(folder, ".xml"):
+        xml_path = os.path.join(folder, xml_file)
         try:
-            new_name = build_filename_from_xml(os.path.join(folder, xml_file))
+            doc_type = detect_document_type_etapa(xml_path)
+
+            if doc_type == "factura":
+                new_name = build_filename_from_xml(xml_path)
+            elif doc_type == "notaCredito":
+                new_name = build_noc_filename_from_xml(xml_path)
+            elif doc_type == "retención":
+                new_name = build_ret_filename_from_xml(xml_path)
+            else:
+                _log(f"Tipo desconocido para {xml_file}: {doc_type}", log_fn)
+                continue
+
             rename_file_pair(folder, xml_file, new_name)
             count += 1
         except Exception as e:
@@ -364,7 +408,7 @@ def has_valid_document_subdirs(folder: str) -> bool:
     return os.path.isdir(facs_dir) and os.path.isdir(nocs_dir)
 
 def organize_documents_by_type(folder: str, log_fn: LogFn = None):
-    """Detecta tipo de cada XML, crea subdirs (facs/, nocs/) si no existen, mueve archivos."""
+    """Detecta tipo de cada XML, crea subdirs (facs/, nocs/), mueve archivos XML + PDF correspondiente."""
     facs_dir = os.path.join(folder, "facs")
     nocs_dir = os.path.join(folder, "nocs")
 
@@ -378,18 +422,26 @@ def organize_documents_by_type(folder: str, log_fn: LogFn = None):
         file_path = os.path.join(folder, filename)
         try:
             tipo = detect_document_type_etapa(file_path)
+            base_name = os.path.splitext(filename)[0]
+            pdf_name = base_name + ".pdf"
+            pdf_path = os.path.join(folder, pdf_name)
+
             if tipo == "factura":
-                new_path = os.path.join(facs_dir, filename)
-                os.rename(file_path, new_path)
+                new_xml_path = os.path.join(facs_dir, filename)
+                os.rename(file_path, new_xml_path)
+                if os.path.exists(pdf_path):
+                    os.rename(pdf_path, os.path.join(facs_dir, pdf_name))
                 moved_facs += 1
             elif tipo == "notaCredito":
-                new_path = os.path.join(nocs_dir, filename)
-                os.rename(file_path, new_path)
+                new_xml_path = os.path.join(nocs_dir, filename)
+                os.rename(file_path, new_xml_path)
+                if os.path.exists(pdf_path):
+                    os.rename(pdf_path, os.path.join(nocs_dir, pdf_name))
                 moved_nocs += 1
         except Exception as e:
             _log(f"  No se pudo organizar {filename}: {e}", log_fn)
 
-    _log(f"Organizados: {moved_facs} facturas → facs/, {moved_nocs} notas de crédito → nocs/", log_fn)
+    _log(f"Organizados: {moved_facs} facturas + PDFs → facs/, {moved_nocs} notas de crédito + PDFs → nocs/", log_fn)
 
 def process_organized_folder(folder: str, log_fn: LogFn = None) -> dict:
     """Procesa los subdirectorios facs/ y nocs/ si existen."""

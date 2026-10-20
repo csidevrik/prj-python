@@ -24,7 +24,7 @@ class WorkingFolderPanel:
 
     def _on_browse_click(self, e):
         """Abre el diálogo de selección de carpeta."""
-        self._picker.get_directory_path(initial_directory=self._current_folder)
+        self._picker.get_directory_path()
 
     def _on_picker_result(self, e: ft.FilePickerResultEvent):
         """Maneja la selección de carpeta desde el File Picker."""

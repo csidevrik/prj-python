@@ -7,12 +7,22 @@ Todos los cambios notables en este proyecto se documentarán en este archivo.
 ## [Unreleased]
 
 ### En Progreso 🚧
-- **Paso 6: Mejorar `rename_files_with_attributes()` para NC y Retenciones**
-  - Actualmente: solo renombra facturas (formato: `FAC{estab}{ptoEmi}{secue}-{codigo}`)
-  - Mejora: detectar tipo (factura/NC/retención) y aplicar nomenclatura específica
-  - NC: `NOC{estab}{ptoEmi}{secue}-{codigo_inst}`
-  - RET: `RET{estab}{ptoEmi}{secue}` (retenciones no tienen código de instalación)
-  - Beneficio: archivos organizados y fáciles de auditar por tipo
+- **Paso 6: Mejorar `rename_files_with_attributes()` para NC y Retenciones** (14/10/2026)
+  - ❌ Actualmente: solo renombra facturas (formato: `FAC{estab}{ptoEmi}{secue}-{codigo}`)
+  - ✨ Mejora: detectar tipo (factura/NC/retención) y aplicar nomenclatura específica
+  
+  **Nomenclatura por tipo:**
+  - Factura: `FAC{estab}{ptoEmi}{secue}-{codigo}` (ej: FAC001003000404284-I0273682)
+  - Nota de Crédito: `NOC{estab}{ptoEmi}{secue}-{codigo}` (ej: NOC001003000404284-I0205929)
+  - Retención: `RET{estab}{ptoEmi}{secue}` (ej: RET001200000034150)
+  
+  **Cambios técnicos:**
+  1. Crear helper `build_noc_filename()` para NC
+  2. Crear helper `build_ret_filename()` para retenciones
+  3. Actualizar `rename_files_with_attributes()` para detectar tipo y llamar helper correspondiente
+  4. Usar `detect_document_type_etapa()` para detectar tipo
+  
+  **Beneficio:** Archivos organizados y fáciles de auditar por tipo de documento
 
 ### Features ✨
 - **Logging Profesional** — Sistema centralizado con 5 niveles (DEBUG, INFO, WARNING, ERROR, CRITICAL)
