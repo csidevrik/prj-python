@@ -328,3 +328,154 @@ Claude Code (este agente) **no puede procesar archivos `.xlsx` directamente**. N
 3. Integrar en FACRET
 
 **Fecha propuesta:** 2026-10-19
+
+---
+
+## Solución Final: Presupuesto Versionado (Octubre 2026)
+
+### El Verdadero Problema Identificado
+
+**NO es:** Calcular presupuestos una sola vez.
+
+**ES:** Mantener presupuestos que **cambian constantemente** sin que el trabajo manual te mate.
+
+**Raíz del problema:**
+- Cambias 1 tarifa en Excel → tienes que recalcular 100+ servicios manualmente
+- Agregas un servicio nuevo → más cálculos manuales
+- Cambio de período → todo se recomputa
+- Esto sucede **constantemente**, no una sola vez
+
+### La Solución: Presupuesto Versionado
+
+Un presupuesto que funciona como un **documento versionado** (como Git):
+- **v1.0** (Presupuesto inicial Sep 2026)
+- **v1.1** (Se agregaron 5 servicios en Oct)
+- **v1.2** (Se cambió tarifa en Nov)
+- **v2.0** (Se inició ETAPA-RE2 con cambios masivos)
+
+Cada versión:
+- ✅ Recalcula automáticamente (sin tocar Excel)
+- ✅ Preserva histórico (nunca pierdes información)
+- ✅ Es auditable (qué cambió, cuándo, por qué)
+- ✅ Es versionable (puedes comparar v1.0 vs v1.2)
+
+### Ventaja Estratégica
+
+**Antes (Excel):**
+```
+1. Cambias tarifa
+2. Esperas a que recalcule
+3. Copias números
+4. Haces ajustes manuales
+5. Documentas (o no)
+6. Repites cuando hay otro cambio
+= TEDIOSO, PROPENSO A ERRORES, SIN AUDITORÍA
+```
+
+**Después (Presupuesto Versionado):**
+```python
+presupuesto.cambiar_tarifa_servicio("S015", 150.00, "Upgrade")
+# Sistema genera v1.2 automáticamente
+# Recalcula TODO
+# Audita el cambio
+# Listo
+= 1 LÍNEA DE CÓDIGO, AUTOMÁTICO, AUDITADO
+```
+
+### Estructura de Datos (Concept)
+
+```
+PRESUPUESTO v1.0
+├─ servicios[50]
+│  ├─ S001: Ricaurte, $100/mes, 37 meses → $3,610
+│  ├─ S002: I0247963, $100/mes, 37 meses → $3,610
+│  └─ ... (50 servicios)
+├─ total: $385,000
+
+PRESUPUESTO v1.1 (Agregados 5 servicios)
+├─ servicios[55]
+│  ├─ ... (50 anteriores)
+│  ├─ S051: Nueva parada, $100/mes, 36 meses → $3,600
+│  └─ ... (5 nuevos)
+├─ total: $387,500
+├─ auditoria: {
+│    tipo: "agregar_servicios",
+│    cantidad: 5,
+│    impacto: +$2,500
+│  }
+
+PRESUPUESTO v1.2 (Cambio de tarifa en S015)
+├─ servicios[55]
+│  ├─ ... (54 anteriores)
+│  ├─ S015: Radar, $150/mes (fue $100), 37 meses → $5,550
+│  └─ ... (restante)
+├─ total: $390,000
+├─ auditoria: {
+│    tipo: "cambio_tarifa",
+│    servicio: "S015",
+│    tarifa_anterior: $100,
+│    tarifa_nueva: $150,
+│    impacto: +$1,850
+│  }
+```
+
+### Comparativa de Cambios
+
+Pregunta: "¿Cuál fue el impacto de los cambios?"
+Respuesta automática:
+```
+v1.0 → v1.1: +$2,500 (5 servicios nuevos)
+v1.1 → v1.2: +$1,850 (upgrade de bandwidth)
+Total acumulado: +$4,350
+```
+
+### Fases de Implementación
+
+**FASE 1:** Presupuesto Versionado para 1 servicio (caso base)
+- Leer Excel actual
+- Crear v1.0 con estructura JSON
+- Implementar cambios (tarifa, agregar, eliminar)
+- Generar nuevas versiones automáticamente
+- Auditar cambios
+- Duración: 4-6 días
+
+**FASE 2:** Escalar a 100+ servicios
+- Procesar todos los servicios en batch
+- Generar reportes consolidados
+- Integrar en UI de FACRET
+- Duración: 2-3 días
+
+**FASE 3:** Funcionalidades avanzadas
+- Revertir a versión anterior
+- Exportar reportes por período
+- Análisis de impacto (qué cambió más, dónde se gasta más)
+- Duración: 3-5 días
+
+### Preguntas Clave para Fase 1
+
+Antes de comenzar, necesito saber:
+
+1. **Excel actual — Estructura:**
+   - Columnas exactas (ubicación, código_inst, fecha_inicio, tarifa, etc.)
+   - Cuántas filas (servicios)
+   - Una hoja o varias (RE1 / RE2 separadas)
+
+2. **Cambios que ocurren:**
+   - ¿Qué tipos de cambios hay? (tarifa, agregar, eliminar, cambio de período)
+   - ¿Con qué frecuencia? (diario, semanal, mensual)
+
+3. **Almacenamiento:**
+   - ¿JSON, DB, ambas?
+   - ¿Dónde en FACRET? (carpeta `data/presupuestos/`)
+
+4. **Workflow deseado:**
+   - Hoy: "cambio en Excel"
+   - Mañana: ¿cómo debería ser?
+
+### Próximo Paso
+
+Lee `PLAN_CALCULO_PRESUPUESTO.md` (documento completamente actualizado) y responde las 7 preguntas en la sección "Siguiente Paso: Preguntas para Fase 1".
+
+Con eso, implementamos Fase 1 y liberamos tu tiempo de Excel para siempre.
+
+**Fecha de esta decisión:** 2026-10-25
