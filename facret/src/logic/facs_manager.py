@@ -269,7 +269,9 @@ def extract_fac_register(xml_file_path: str) -> Factura:
     numero = build_numero_factura(estab, pto_em, secue)
     valor  = root.find(".//totalSinImpuestos").text
     fech_emi  = root.find(".//fechaEmision").text
-    return Factura(code_inst=codigo, number_fac=numero, value_serv=valor, fecha_emision=fech_emi)
+    fech_max_pago_elem = root.find('.//campoAdicional[@nombre="FechaMaxPago"]')
+    fech_max_pago = fech_max_pago_elem.text if fech_max_pago_elem is not None else None
+    return Factura(code_inst=codigo, number_fac=numero, value_serv=valor, fecha_emision=fech_emi, fecha_max_pago=fech_max_pago)
 
 # Extract nota de crédito data from XML and return a NotaCredito object.
 
@@ -332,6 +334,7 @@ def process_all_xml_facs(folder: str, log_fn: LogFn = None) -> int:
                 "number_fac": r.number_fac,
                 "value_serv": r.value_serv,
                 "fecha_emision":   r.fecha_emision,
+                "fecha_max_pago": r.fecha_max_pago,
                 "name_original": filename,
             })
         except Exception as e:

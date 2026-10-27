@@ -2,11 +2,12 @@ from dataclasses import dataclass, field
 
 
 class Factura:
-    def __init__(self, code_inst, number_fac, value_serv , fecha_emision):
+    def __init__(self, code_inst, number_fac, value_serv, fecha_emision, fecha_max_pago=None):
         self.code_inst = code_inst
         self.number_fac = number_fac
         self.value_serv = value_serv
         self.fecha_emision = fecha_emision
+        self.fecha_max_pago = fecha_max_pago
 
 class Retencion:
     def __init__(self, ret_number, ret_value, fac_number):
