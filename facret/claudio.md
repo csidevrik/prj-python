@@ -479,3 +479,87 @@ Lee `PLAN_CALCULO_PRESUPUESTO.md` (documento completamente actualizado) y respon
 Con eso, implementamos Fase 1 y liberamos tu tiempo de Excel para siempre.
 
 **Fecha de esta decisión:** 2026-10-25
+
+---
+
+## Mejora: Extracción de FechaMaxPago desde Campos Adicionales (Octubre 2026)
+
+### Problema Identificado
+
+Necesitaba extraer **FechaMaxPago** de los XMLs de factura de ETAPA EP, pero el campo **no estaba donde se buscaba**.
+
+**Estructura correcta encontrada:**
+```xml
+<infoAdicional>
+    <campoAdicional nombre="FechaMaxPago">09/11/2026</campoAdicional>
+    <campoAdicional nombre="Instalacion">RDD01974</campoAdicional>
+    <campoAdicional nombre="Consumo">09/2026</campoAdicional>
+    <!-- ... más campos adicionales -->
+</infoAdicional>
+```
+
+**Lo que estaba mal:**
+- Buscaba `<FechaMaxPago>` como tag directo
+- Realidad: es un atributo `nombre` dentro de `<campoAdicional>`
+
+### Solución Implementada
+
+**1. Actualizar clase `Factura` en models.py:**
+```python
+class Factura:
+    def __init__(self, code_inst, number_fac, value_serv, fecha_emision, fecha_max_pago=None):
+        self.code_inst = code_inst
+        self.number_fac = number_fac
+        self.value_serv = value_serv
+        self.fecha_emision = fecha_emision
+        self.fecha_max_pago = fecha_max_pago  # ← NUEVO
+```
+
+**2. Actualizar `extract_fac_register()` en facs_manager.py:**
+```python
+# Extraer correctamente del campoAdicional
+fech_max_pago_elem = root.find('.//campoAdicional[@nombre="FechaMaxPago"]')
+fech_max_pago = fech_max_pago_elem.text if fech_max_pago_elem is not None else None
+return Factura(code_inst=codigo, number_fac=numero, value_serv=valor, 
+               fecha_emision=fech_emi, fecha_max_pago=fech_max_pago)
+```
+
+**3. Incluir en registros CSV:**
+```python
+registros.append({
+    "code_inst":  r.code_inst,
+    "number_fac": r.number_fac,
+    "value_serv": r.value_serv,
+    "fecha_emision": r.fecha_emision,
+    "fecha_max_pago": r.fecha_max_pago,  # ← NUEVO
+    "name_original": filename,
+})
+```
+
+### Resultado
+
+**Commit:** `cfda339` en rama `facreto`
+- ✅ Extrae correctamente FechaMaxPago desde campoAdicional
+- ✅ Manejo seguro: si el campo no existe, se asigna None
+- ✅ CSV ahora incluye columna `fecha_max_pago` con fechas de vencimiento
+
+**Archivo actualizado:** `facturas.csv`
+```
+code_inst | number_fac | value_serv | fecha_emision | fecha_max_pago | name_original
+I0205929  | FAC...     | 416.64     | 2/10/2026     | 09/11/2026     | FAC065173793_001.xml
+```
+
+### Lecciones Aprendidas
+
+**Importancia de ver la estructura XML real:**
+- Asumir estructura sin verificar → código que no funciona
+- Verificar tag exacto en XML → solución correcta
+
+**XPath correcto para campos adicionales ETAPA EP:**
+```python
+.//campoAdicional[@nombre="NombreDelCampo"]
+```
+
+Este patrón puede reutilizarse para extraer otros campos adicionales (Consumo, Instalacion, Dir Instal, etc.).
+
+**Fecha de implementación:** 2026-10-27
