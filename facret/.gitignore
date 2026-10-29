@@ -18,6 +18,9 @@ logs/
 facret.log*
 *.log
 
+## 🧾 Informes y registros del clasificador de facturas (datos reales)
+data/informes/
+
 ## ⚙️ Configuración Local del Usuario (NO compartir)
 # Archivos que cada usuario crea localmente y no deben sincronizarse
 config/app_config.json          # Config persistente usuario-específica
