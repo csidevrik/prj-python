@@ -7,6 +7,14 @@ Todos los cambios notables en este proyecto se documentarán en este archivo.
 ## [Unreleased]
 
 ### En Progreso 🚧
+- **Clasificador automático de facturas ETAPA** — separa telecom, agua y revisar leyendo el XML del correo
+  - `src/logic/facs_clasificador.py` — regla de clasificación sobre el XML, sin Outlook
+  - `src/logic/outlook_reader.py` — lee `FACS` en Outlook clásico y mueve correos a `AGUA`, `TELECOM` o `REVISAR`
+  - `src/scripts/clasificar_facturas.py` — punto de entrada; modo prueba por defecto, registro de procesados e informe diario en `data/informes/`
+  - `src/scripts/instalar_tarea.bat` — crea la tarea programada cada 5 minutos
+  - `src/scripts/crear_regla_outlook.bat` y `.py` — crea la regla `ETAPA a FACS` en Outlook clásico
+  - Guía de instalación y solución de problemas en `docs/GUIDES/clasificador_facturas.md`
+  - `data/informes/` excluido de Git por contener datos reales de facturas
 - **Paso 6: Mejorar `rename_files_with_attributes()` para NC y Retenciones** (14/10/2026)
   - ❌ Actualmente: solo renombra facturas (formato: `FAC{estab}{ptoEmi}{secue}-{codigo}`)
   - ✨ Mejora: detectar tipo (factura/NC/retención) y aplicar nomenclatura específica

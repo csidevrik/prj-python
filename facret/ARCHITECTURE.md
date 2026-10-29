@@ -92,6 +92,21 @@ logic/
 
 **Ventaja:** Testeable sin UI. Reutilizable en CLI o API futura.
 
+### Nivel 3b: Scripts de automatización (`scripts/`)
+
+Puntos de entrada ejecutables fuera de la app (Programador de tareas, línea de comandos). No contienen lógica de negocio: la llaman desde `logic/`.
+
+```
+scripts/
+├── clasificar_facturas.py      # clasifica correos de ETAPA y genera informe
+├── crear_regla_outlook.py      # crea la regla de Outlook
+├── ejecutar_clasificador.bat   # lo ejecuta la tarea programada
+├── instalar_tarea.bat          # crea la tarea programada
+└── crear_regla_outlook.bat     # ejecuta crear_regla_outlook.py
+```
+
+Ver [docs/GUIDES/clasificador_facturas.md](docs/GUIDES/clasificador_facturas.md).
+
 ---
 
 ### Nivel 4: Datos (`models/`)

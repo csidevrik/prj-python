@@ -563,3 +563,44 @@ I0205929  | FAC...     | 416.64     | 2/10/2026     | 09/11/2026     | FAC065173
 Este patrón puede reutilizarse para extraer otros campos adicionales (Consumo, Instalacion, Dir Instal, etc.).
 
 **Fecha de implementación:** 2026-10-27
+
+---
+
+## Clasificador automático de facturas ETAPA (Octubre 2026)
+
+### Estado
+- Archivos: `src/logic/facs_clasificador.py`, `src/logic/outlook_reader.py`, `src/scripts/clasificar_facturas.py`, y los scripts de instalación de la tarea y la regla.
+- Outlook: regla `ETAPA a FACS` activa. Carpetas `FACS\AGUA`, `FACS\TELECOM` y `FACS\REVISAR` creadas.
+- Probado en esta PC: modo prueba, modo real y tarea programada. La creación de la regla por COM y el nuevo `ejecutar_clasificador.bat` aún no se han probado.
+
+### Reglas de clasificación
+- AGUA: existe `campoAdicional Medidor`, o `Instalacion` tiene formato `A` + dígitos (ej. `A0101712`).
+- TELECOM: `Instalacion` tiene formato `I0`/`IO` + 6 dígitos o `RDD` + 5 dígitos, y no hay `Medidor`.
+- REVISAR: señales contradictorias, sin `Instalacion`, sin XML o error al leer.
+
+### Decisiones
+- El clasificador reutiliza `extract_xml_fragment` y `extract_fac_register` de `facs_manager.py`. No se modificó ese archivo.
+- Los informes van a `data/informes/informe_AAAA-MM-DD.csv`. El registro de procesados va en `data/informes/procesados.json`.
+- Modo prueba por defecto (no mueve correos). `--real` mueve y registra.
+- Bloqueo en `data/informes/.ejecucion.lock` para evitar ejecuciones simultáneas.
+- Protección principal contra reprocesar: el correo sale de `FACS`. El registro es respaldo.
+
+### Hallazgo
+- `process_all_xml_facs` incluiría facturas de agua en `facturas.csv` (ej. `A0101712`). Por eso el CSV de telecom debe generarse solo con los XML clasificados como TELECOM.
+
+### Pendiente
+1. ~~Validar la regla con un XML de telecom real.~~ Hecho: `FAC063848613` (I0273682) clasificada como TELECOM.
+2. ~~Ejecutar en modo prueba y revisar el informe.~~ Hecho el 28/10/2026: 7 correos, Telecom=1, Agua=6, Revisar=0.
+3. Modo real ejecutado el 28/10/2026: 7 correos movidos (6 a AGUA, 1 a TELECOM).
+4. Tarea programada `FACRET_ClasificadorETAPA` cada 5 minutos, ejecuta `src/scripts/ejecutar_clasificador.bat`. Log en `data/informes/tarea.log`. Cambiar a cada hora cuando se valide el funcionamiento (requiere autorización).
+4. Crear la tarea de Windows cada 5 minutos, luego cada hora (requiere autorización explícita).
+
+---
+
+## Reglas operativas: clasificador de facturas
+
+- Procedimiento de instalación y solución de problemas: `docs/GUIDES/clasificador_facturas.md`.
+- Mantener la tarea programada activa solo en la PC principal. Las carpetas viajan por IMAP, pero el registro (`procesados.json`) y los informes son locales.
+- No versionar `facret/data/informes/`: contiene datos reales de facturas. Ya está en `.gitignore`.
+- La regla `ETAPA a FACS` se crea con `src/scripts/crear_regla_outlook.bat`; la tarea con `src/scripts/instalar_tarea.bat`. No crear ni modificar ambas a mano.
+- Remitente de ETAPA: `info@comunicados-etapa.com`. Debe coincidir exactamente en la regla y en `outlook_reader.py`.
