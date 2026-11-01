@@ -11,7 +11,7 @@ Todos los cambios notables en este proyecto se documentarán en este archivo.
   - `src/logic/facs_clasificador.py` — regla de clasificación sobre el XML, sin Outlook
   - `src/logic/outlook_reader.py` — lee `FACS` en Outlook clásico y mueve correos a `AGUA`, `TELECOM` o `REVISAR`
   - `src/scripts/clasificar_facturas.py` — punto de entrada; modo prueba por defecto, registro de procesados e informe diario en `data/informes/`
-  - `src/scripts/instalar_tarea.bat` — crea la tarea programada cada 5 minutos
+  - `src/scripts/instalar_tarea.bat` — crea la tarea programada cada hora
   - `src/scripts/crear_regla_outlook.bat` y `.py` — crea la regla `ETAPA a FACS` en Outlook clásico
   - Guía de instalación y solución de problemas en `docs/GUIDES/clasificador_facturas.md`
   - `data/informes/` excluido de Git por contener datos reales de facturas
