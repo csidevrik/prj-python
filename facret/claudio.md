@@ -604,3 +604,100 @@ Este patrón puede reutilizarse para extraer otros campos adicionales (Consumo, 
 - No versionar `facret/data/informes/`: contiene datos reales de facturas. Ya está en `.gitignore`.
 - La regla `ETAPA a FACS` se crea con `src/scripts/crear_regla_outlook.bat`; la tarea con `src/scripts/instalar_tarea.bat`. No crear ni modificar ambas a mano.
 - Remitente de ETAPA: `info@comunicados-etapa.com`. Debe coincidir exactamente en la regla y en `outlook_reader.py`.
+
+---
+
+## Generador automático de informe técnico previo al pago (Noviembre 2026)
+
+### Problema identificado
+
+**Antes:** Crear informe de pago manualmente para 100+ facturas.
+- Armar Excel con datos de facturas
+- Ordenar columnas según formato
+- Copiar a Word
+- Ajustar tablas y formatos
+- **Tiempo:** 2-3 horas por período de pago
+
+### Solución implementada
+
+**Script Python:** `src/scripts/generar_informe_pago.py`
+
+Automatiza completamente: facturas CSV → Word con estructura profesional
+```bash
+python src/scripts/generar_informe_pago.py
+```
+
+**Archivos requeridos:**
+- `facturas.csv` — Generado por Flet app (columns: code_inst, number_fac, value_serv, fecha_emision, fecha_max_pago, name_original)
+- `INVENTARIO_DATOS_ENLACES.csv` — Maestro de servicios (columns: GRUPO, COD.SERV, UBICACION, TIPO UPGRADE, BANDW, V.SERVICIO, F.I.S, F.F.S)
+
+**Proceso:**
+1. Lee CSV de facturas (ej. 103 registros en octubre)
+2. Lee CSV de inventario (96 servicios)
+3. Hace JOIN por `COD.SERV`
+4. Genera Word con secciones:
+   - Encabezados contractuales
+   - Tabla de servicios por grupo (G1, G2, G3, G4, G5)
+   - Tabla de facturas detallada (PARTIDA, GRUPO, CODIGO, UBICACION, TIPO, BANDW, FACTURA, VALOR, FECHAS)
+   - Subtotales por grupo
+   - Total general
+5. Guardak Word en `reportes/INFORME_PAGO_OCTUBRE_2026.docx`
+
+**Resultado:**
+- De 2-3 horas → **3 segundos**
+- Octubre 2026: 103 facturas, $11,965.11, 100% datos completos
+
+### Cómo usar (mensual)
+
+Cambiar variable en script y ejecutar:
+```python
+PERIODO = "NOVIEMBRE 2026"  # ← Cambiar mes
+```
+
+```bash
+python src/scripts/generar_informe_pago.py
+```
+
+**Archivo generado:** `reportes/INFORME_PAGO_NOVIEMBRE_2026.docx`
+
+### Archivos del sistema
+
+- `src/scripts/generar_informe_pago.py` — Generador principal
+- `src/scripts/diagnostico_merge.py` — Debug: identifica registros sin match en JOIN
+- `reportes/` — Carpeta donde se guardan los DOCX (se crea automáticamente si no existe)
+
+### Decisiones de diseño
+
+**JOIN sobre COD.SERV:**
+- Facturas llegan con `code_inst` (código de instalación)
+- Inventario tiene `COD.SERV` (mismo código, diferente nombre de columna)
+- Merge con `how='left'` asegura que TODOS los registros de facturas aparecen (incluso si faltan en inventario)
+
+**Manejo de ubicaciones con comas:**
+- Inventario CSV contiene ubicaciones con comas internas (ej. "PARADA X, CALLE Y, BARRIO Z")
+- Parsed con `quotechar='"'` para manejar correctamente
+- `on_bad_lines='skip'` descarta líneas malformadas (respaldo)
+
+**Conversión de fechas seriales de Excel:**
+- Inventario usa formato serial de Excel (ej. 46272 = 2026-09-07)
+- Script convierte con epoch Excel (30/12/1899) + días
+
+### Validación
+
+**Diagnóstico de merge:**
+```bash
+python src/scripts/diagnostico_merge.py
+```
+
+Verifica:
+- ✅ Registros con match (both)
+- ❌ Registros sin match en inventario (left_only)
+- ⚠️ Campos en blanco
+
+Octubre 2026: 103 registros, 103 con match, 0 blancos → ✅ **100% OK**
+
+### Pendiente
+
+- Integrar generación en Flet app (click→generar Word automático)
+- Agregar opciones de salida: PDF, email directo
+- Almacenar histórico de informes con versionado (v1.0, v1.1, etc.)
