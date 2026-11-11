@@ -592,8 +592,7 @@ Este patrón puede reutilizarse para extraer otros campos adicionales (Consumo, 
 1. ~~Validar la regla con un XML de telecom real.~~ Hecho: `FAC063848613` (I0273682) clasificada como TELECOM.
 2. ~~Ejecutar en modo prueba y revisar el informe.~~ Hecho el 28/10/2026: 7 correos, Telecom=1, Agua=6, Revisar=0.
 3. Modo real ejecutado el 28/10/2026: 7 correos movidos (6 a AGUA, 1 a TELECOM).
-4. Tarea programada `FACRET_ClasificadorETAPA` cada 5 minutos, ejecuta `src/scripts/ejecutar_clasificador.bat`. Log en `data/informes/tarea.log`. Cambiar a cada hora cuando se valide el funcionamiento (requiere autorización).
-4. Crear la tarea de Windows cada 5 minutos, luego cada hora (requiere autorización explícita).
+4. Tarea programada `FACRET_ClasificadorETAPA` cada hora (`/SC HOURLY /MO 1`), ejecuta `src/scripts/ejecutar_clasificador.bat`. Log en `data/informes/tarea.log`. Se cambió de 5 minutos a 1 hora el 01/11/2026 tras validar el funcionamiento.
 
 ---
 

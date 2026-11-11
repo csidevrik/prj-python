@@ -12,7 +12,7 @@ Separa las facturas de ETAPA que llegan a Outlook en TELECOM, AGUA o REVISAR, mu
 | `src/logic/outlook_reader.py` | Conecta con Outlook clásico, lee `FACS` y mueve correos. |
 | `src/scripts/clasificar_facturas.py` | Punto de entrada. Modo prueba por defecto; `--real` mueve correos. |
 | `src/scripts/ejecutar_clasificador.bat` | Lo ejecuta la tarea programada en modo real. |
-| `src/scripts/instalar_tarea.bat` | Crea la tarea programada cada 5 minutos. |
+| `src/scripts/instalar_tarea.bat` | Crea la tarea programada cada hora. |
 | `src/scripts/crear_regla_outlook.bat` | Crea en Outlook la regla `ETAPA a FACS`. |
 | `src/scripts/crear_regla_outlook.py` | Lógica de la regla. Lo llama el `.bat`. |
 
@@ -64,7 +64,7 @@ Los dos scripts pueden ejecutarse varias veces sin efectos adicionales.
    poetry run python src\scripts\clasificar_facturas.py
    ```
    Debe terminar con una línea `Modo prueba: N correo(s) revisados...`.
-2. Esperar hasta 5 minutos y revisar `data\informes\tarea.log`. Cada ejecución real agrega una línea con sus conteos.
+2. Esperar hasta una hora (o ejecutar `schtasks /Run /TN "FACRET_ClasificadorETAPA"` para forzarla) y revisar `data\informes\tarea.log`. Cada ejecución real agrega una línea con sus conteos.
 3. Mover un correo de prueba de `ETAPA` a `FACS` y comprobar que sale de `FACS` y llega a `AGUA` o `TELECOM`.
 
 ---
