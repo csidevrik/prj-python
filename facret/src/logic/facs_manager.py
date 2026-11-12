@@ -153,6 +153,20 @@ def build_filename_from_xml(file_path: str) -> str:
     codigo = root.find('.//campoAdicional[@nombre="Instalacion"]').text
     return f"{build_numero_factura(estab, pto_em, secue)}-{codigo}"
 
+# Versiones SIN prefijo FAC
+def build_numero_factura_sin_prefijo(estab: str, pto_em: str, secue: str) -> str:
+    """Solo el número compuesto sin prefijo FAC"""
+    return f"{estab}{pto_em}{secue}"
+
+def build_filename_from_xml_sin_prefijo(file_path: str) -> str:
+    """Construye nombre de archivo SIN prefijo FAC (solo número compuesto)"""
+    root   = extract_xml_fragment(file_path, "<infoTributaria>", "</infoAdicional>")
+    estab  = root.find(".//estab").text
+    pto_em = root.find(".//ptoEmi").text
+    secue  = root.find(".//secuencial").text
+    return build_numero_factura_sin_prefijo(estab, pto_em, secue)
+
+
 def build_noc_filename_from_xml(file_path: str) -> str:
     """Construye nombre de archivo para NOTA DE CRÉDITO."""
     root   = extract_xml_fragment(file_path, "<infoTributaria>", "</infoAdicional>")
@@ -211,6 +225,26 @@ def rename_files_with_attributes(folder: str, log_fn: LogFn = None):
         except Exception as e:
             _log(f"Error renombrando {xml_file}: {e}", log_fn)
     _log(f"Renombrados: {count} par(es) XML+PDF.", log_fn)
+
+def rename_files_without_prefix(folder: str, log_fn: LogFn = None):
+    """Renombra archivos SIN prefijo FAC (solo número compuesto para sistema interno)."""
+    count = 0
+    for xml_file in get_files_extension(folder, ".xml"):
+        xml_path = os.path.join(folder, xml_file)
+        try:
+            doc_type = detect_document_type_etapa(xml_path)
+            
+            if doc_type == "factura":
+                new_name = build_filename_from_xml_sin_prefijo(xml_path)
+            else:
+                _log(f"Solo se renombran facturas sin prefijo. {xml_file} es: {doc_type}", log_fn)
+                continue
+            
+            rename_file_pair(folder, xml_file, new_name)
+            count += 1
+        except Exception as e:
+            _log(f"Error renombrando {xml_file}: {e}", log_fn)
+    _log(f"Renombrados (sin prefijo): {count} par(es) XML+PDF.", log_fn)
 
 
 # ── Detección de tipo de documento (ETAPA EP) ─────────────────────────────────

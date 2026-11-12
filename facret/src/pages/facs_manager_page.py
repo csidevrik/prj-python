@@ -46,6 +46,14 @@ ACTIONS = [
         "icon":  ft.Icons.DRIVE_FILE_RENAME_OUTLINE,
         "fn":    lambda folder, log: fm.rename_files_with_attributes(folder, log),
     },
+        {
+        "key":   "rename_no_prefix",
+        "label": "Renombrar sin prefijo FAC",
+        "desc":  "Renombra facturas solo con el número compuesto para sistema interno: 001003001234",
+        "icon":  ft.Icons.TAG_OUTLINED,
+        "fn":    lambda folder, log: fm.rename_files_without_prefix(folder, log),
+    },
+
     {
         "key":   "proc_fac",
         "label": "Procesar documentos XML",
