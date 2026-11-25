@@ -14,6 +14,10 @@ flet-desktop = ">=0.28.3,<0.29.0"
 pdf2image = ">=1.17.0,<2.0.0"
 pywin32 = "^311"
 pymongo = "^4.9"
+playwright = "^1.65.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.2.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

@@ -7,6 +7,10 @@ Todos los cambios notables en este proyecto se documentarán en este archivo.
 ## [Unreleased]
 
 ### En Progreso 🚧
+- **Panel "Cargar facturas" (registro automático en Pago Empresas de ETAPA)** — Playwright + Flet, por lotes, con control de IVA y reanudación
+  - Fase 1 en curso: modelos, reglas de IVA y parser de valores (formatos "1.151,15", "1151,15" y "$ 1151.15"), y lector de `facturas.csv`, con tests sin navegador
+  - Dependencias nuevas: `playwright` (runtime), `pytest` (desarrollo) y Chromium descargado por Playwright
+  - Diseño completo en `C:\Users\adminos\.claude\plans\glittery-toasting-pudding.md`
 - **Clasificador automático de facturas ETAPA** — separa telecom, agua y revisar leyendo el XML del correo
   - `src/logic/facs_clasificador.py` — regla de clasificación sobre el XML, sin Outlook
   - `src/logic/outlook_reader.py` — lee `FACS` en Outlook clásico y mueve correos a `AGUA`, `TELECOM` o `REVISAR`
