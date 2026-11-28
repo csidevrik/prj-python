@@ -50,6 +50,14 @@ def normalizar_number_fac(numero: str) -> str:
     return limpio
 
 
+def normalizar_numero_mostrado(texto: str) -> str:
+    """Acepta lo que muestra el sitio: con o sin prefijo FAC, con o sin guiones (001-003-055630898)."""
+    limpio = re.sub(r"[-\s]", "", texto).upper()
+    if re.fullmatch(r"\d{15}", limpio):
+        limpio = "FAC" + limpio
+    return normalizar_number_fac(limpio)
+
+
 def valor_esperado_con_iva(base_sin_iva: Decimal) -> Decimal:
     return (base_sin_iva * IVA).quantize(_CENTAVOS, rounding=ROUND_HALF_UP)
 

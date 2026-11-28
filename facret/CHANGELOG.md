@@ -8,7 +8,12 @@ Todos los cambios notables en este proyecto se documentarán en este archivo.
 
 ### En Progreso 🚧
 - **Panel "Cargar facturas" (registro automático en Pago Empresas de ETAPA)** — Playwright + Flet, por lotes, con control de IVA y reanudación
-  - Fase 1 en curso: modelos, reglas de IVA y parser de valores (formatos "1.151,15", "1151,15" y "$ 1151.15"), y lector de `facturas.csv`, con tests sin navegador
+  - Fase 1 (commit `104cae1`): modelos, reglas de IVA y parser de valores (formatos "1.151,15", "1151,15" y "$ 1151.15"), y lector de `facturas.csv`, con tests sin navegador
+  - Fase 3 (lectura): `logic/etapa_playwright.py` con login manual, abrir órdenes, captura y volcado de la página, más `scripts/diagnostico_etapa.py`. Sin escribir nada en ETAPA
+  - Fase 4-5 en curso: carga por lotes de 10 en la orden nueva, con revisión de órdenes abiertas ajenas, reanudación desde `etapa_estado.json` y confirmación `SI` antes de cada lote. Órdenes anuladas y ajenas nunca se tocan
+  - Fase 7 en curso: `crear_orden` en `logic/etapa_playwright.py`, con validación previa de datos de quien registra (`logic/etapa_orden_datos.py`), confirmación del usuario antes de guardar y detección de la orden nueva por diferencia de ids. Sin ejecutar contra el sitio hasta autorización
+  - Primera carga real (26/11/2026): lote de 50 guardado y verificado; el segundo lote falló por una carrera al leer la grilla de búsqueda (mejora H pendiente)
+  - Procedimiento mensual, inventario de archivos y mejoras pendientes en `docs/GUIDES/cargar_facturas.md`
   - Dependencias nuevas: `playwright` (runtime), `pytest` (desarrollo) y Chromium descargado por Playwright
   - Diseño completo en `C:\Users\adminos\.claude\plans\glittery-toasting-pudding.md`
 - **Clasificador automático de facturas ETAPA** — separa telecom, agua y revisar leyendo el XML del correo

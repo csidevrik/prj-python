@@ -6,6 +6,7 @@ from logic.etapa_reglas import (
     diferencia,
     hay_diferencia,
     normalizar_number_fac,
+    normalizar_numero_mostrado,
     parse_valor,
     valor_esperado_con_iva,
 )
@@ -50,6 +51,11 @@ def test_normalizar_number_fac_acepta_formato_del_csv():
 
 def test_normalizar_number_fac_pasa_a_mayusculas():
     assert normalizar_number_fac("fac001-003-055751634") == "FAC001003055751634"
+
+
+@pytest.mark.parametrize("mostrado", ["001-003-055630898", "FAC001-003-055630898", "fac001003055630898"])
+def test_normalizar_numero_mostrado_acepta_formas_del_sitio(mostrado):
+    assert normalizar_numero_mostrado(mostrado) == "FAC001003055630898"
 
 
 @pytest.mark.parametrize("numero", ["", "FAC001003", "XYZ001003055751634", "FAC00100305575163A"])
